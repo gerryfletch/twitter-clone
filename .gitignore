@@ -3,3 +3,5 @@
 /.idea
 twitter.iml
 twitter-clone.iml
+/.git
+/src/main/java/me/gerryfletcher/twitter/config/JWTSecret

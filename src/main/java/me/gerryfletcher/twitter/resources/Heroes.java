@@ -3,6 +3,7 @@ package me.gerryfletcher.twitter.resources;
 import com.google.gson.*;
 
 import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -23,7 +24,7 @@ public class Heroes {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @PermitAll
+    @RolesAllowed("User")
     public String getHeroes() {
         if (!isPopulated) {
             populateList();
@@ -43,6 +44,7 @@ public class Heroes {
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
+    @PermitAll
     public Response addHero(String json) {
         System.out.println("\n----POST called----");
         System.out.println(json);

@@ -10,7 +10,7 @@ import javax.ws.rs.core.MediaType;
 /**
  * Created by Gerry on 07/06/2017.
  */
-@Path("/login")
+@Path("/Login")
 public class AuthResource {
     @RolesAllowed("ADMIN")
     @GET

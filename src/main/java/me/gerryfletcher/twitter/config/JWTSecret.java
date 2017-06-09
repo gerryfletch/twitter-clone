@@ -24,7 +24,7 @@ public class JWTSecret implements SecretKey{
         return null;
     }
 
-    static String getKey() {
+    public static String getKey() {
         return key;
     }
 }

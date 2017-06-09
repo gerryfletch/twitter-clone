@@ -1,4 +1,4 @@
-package me.gerryfletcher.twitter.resources;
+package me.gerryfletcher.twitter.resources.AccountFunctions;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -34,6 +34,7 @@ public class Login {
             .serializeNulls()
             .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
             .create();
+
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)

@@ -1,5 +1,7 @@
 package me.gerryfletcher.twitter.sqlite;
 
+import me.gerryfletcher.twitter.resources.AccountFunctions.Password;
+
 import java.sql.*;
 
 /**
@@ -24,9 +26,9 @@ public class SQLUtils {
         Connection conn = null;
         try {
             conn = DriverManager.getConnection(url);
-            System.out.println("DB connected.");
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+            e.printStackTrace();
         }
 
         return conn;
@@ -39,8 +41,11 @@ public class SQLUtils {
         // SQL Statement to create users table
         String createTable = "CREATE TABLE IF NOT EXISTS " + tableName +" (\n"
                 + " id integer PRIMARY KEY AUTOINCREMENT,\n"
-                + " username varchar NOT NULL,\n"
-                + " password varchar NOT NULL\n"
+                + " handle varchar NOT NULL,\n"
+                + " displayName varchar NOT NULL,\n"
+                + " email varchar NOT NULL,\n"
+                + " password CHAR(60) NOT NULL,\n"
+                + " role varchar NOT NULL"
                 + ");";
 
         try (Connection conn = connect();
@@ -58,17 +63,28 @@ public class SQLUtils {
     public static void populateUsersTable() {
         String[] names = {"Gerry", "Lauren", "Cathy", "Rob", "Ruben", "Istannen", "Bosco", "Ben", "Dan", "Lucy"};
 
-        String sql = "INSERT INTO users(username,password) VALUES(?,?)";
+        String sql = "INSERT INTO users(handle, displayName, email, password, role) VALUES(?,?,?,?,?)";
 
         try (Connection conn = connect();
              PreparedStatement st = conn.prepareStatement(sql)) {
             for(int i = 0; i < 10; i++) {
-                String username = names[i].toLowerCase();
+                String role = "User";
+                String handle = names[i].toLowerCase();
+                String displayName = "_" + names[i];
+                String email = names[i].toLowerCase() + "@gmail.com";
                 int id = i + 1;
-                String password = "password" + id;
+                String password = "Passw0rd" + id;
+                String hashedPassword = Password.hashPassword(password);
 
-                st.setString(1, username);
-                st.setString(2, password);
+                if(i == 3) {
+                    role = "Admin";
+                }
+
+                st.setString(1, handle);
+                st.setString(2, displayName);
+                st.setString(3, email);
+                st.setString(4, hashedPassword);
+                st.setString(5, role);
                 st.executeUpdate();
             }
         } catch (SQLException e) {
@@ -85,11 +101,16 @@ public class SQLUtils {
 
             while(rs.next()) {
                 System.out.println(rs.getInt("id") + "  |  "
-                        + rs.getString("username")
+                        + rs.getString("handle")
                         + "  |  "
-                        + rs.getString("password"));
+                        + rs.getString("displayName")
+                        + "  |  "
+                        + rs.getString("email")
+                        + "  |  "
+                        + rs.getString("password")
+                        + "  |  "
+                        + rs.getString("role"));
             }
-
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }

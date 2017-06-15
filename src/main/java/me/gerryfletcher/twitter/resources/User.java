@@ -1,5 +1,7 @@
 package me.gerryfletcher.twitter.resources;
 
+import me.gerryfletcher.twitter.sqlite.SQLUtils;
+
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -10,6 +12,14 @@ import javax.ws.rs.PathParam;
  */
 @Path("user")
 public class User {
+
+    @Path("all")
+    @RolesAllowed("Admin")
+    @GET
+    public String getAllUsers() {
+        SQLUtils.selectAllFromUsers();
+        return "Got all users.";
+    }
 
     @Path("{handle}")
     @RolesAllowed("User")

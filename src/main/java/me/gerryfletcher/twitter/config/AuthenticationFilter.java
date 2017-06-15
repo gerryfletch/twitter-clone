@@ -23,8 +23,12 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import org.glassfish.jersey.internal.util.Base64;
 
 /**
- * This filter verify the access permissions for a User
- * based on username and passowrd provided in request
+ * This filter will allow or deny access to a resource depending on
+ * resource annotation.
+ *
+ * If a resource requires a user type, authentication is required.
+ * Currently JWT authentication is fully implemented. If the token
+ * is valid, the role is extracted and checked against the resource.
  */
 @Provider
 public class AuthenticationFilter implements javax.ws.rs.container.ContainerRequestFilter {
@@ -33,6 +37,8 @@ public class AuthenticationFilter implements javax.ws.rs.container.ContainerRequ
     private ResourceInfo resourceInfo;
 
     private static final String AUTHORIZATION_PROPERTY = "Authorization";
+
+    private Method method;
 
     @Override
     public void filter(ContainerRequestContext requestContext) {
@@ -43,15 +49,13 @@ public class AuthenticationFilter implements javax.ws.rs.container.ContainerRequ
         Response ACCESS_FORBIDDEN = Response.status(Response.Status.FORBIDDEN)
                 .entity("You cannot access this resource. Code #2").build();
 
-        Method method = resourceInfo.getResourceMethod();
+        this.method = resourceInfo.getResourceMethod();
 
-        if(method.isAnnotationPresent(PermitAll.class)) {
-            // permit all, so no filtering necessary
+        if(this.method.isAnnotationPresent(PermitAll.class)) {
             return;
         }
 
-        if(method.isAnnotationPresent(DenyAll.class)) {
-            // deny all, abort with forbidden
+        if(this.method.isAnnotationPresent(DenyAll.class)) {
             requestContext.abortWith(ACCESS_FORBIDDEN);
             return;
         }
@@ -69,22 +73,18 @@ public class AuthenticationFilter implements javax.ws.rs.container.ContainerRequ
         }
 
         final String[] authorizationHeader = authorization.get(0).split(" ");
-        final String authType = authorizationHeader[0].toLowerCase();
-
-        /*
-            These methods check the User role
-         */
+        final String authType = authorizationHeader[0].toLowerCase(); // "Bearer" or "Basic"
+        final String token = authorizationHeader[1]; // Token - currently only used for Bearer.
         boolean authorized = false;
 
         switch (authType) {
-            // User is attempting to Login
             case ("basic"):
                 System.out.println("Basic http auth");
-                authorized = checkBasicAuth(authorizationHeader, method);
+                authorized = checkBasicAuth(authorizationHeader);
                 break;
             case ("bearer"):
                 System.out.println("Bearer http auth");
-                authorized = checkBearerAuth(authorizationHeader, method);
+                authorized = checkBearerAuth(token);
                 break;
         }
 
@@ -94,40 +94,28 @@ public class AuthenticationFilter implements javax.ws.rs.container.ContainerRequ
         }
     }
 
-    private boolean checkBearerAuth(String[] authorizationHeader, Method method) {
-        String token = authorizationHeader[1];
+    private boolean checkBearerAuth(String token) {
+        JWTSecret jwt = new JWTSecret();
         System.out.println("TOKEN: " + token);
 
-        try {
-            Algorithm algorithm = Algorithm.HMAC256(JWTSecret.getKey());
-            JWTVerifier verifier = JWT.require(algorithm)
-                .withIssuer("auth0")
-                .build(); //Reusable verifier instance
-            System.out.println("\n-\n");
-            DecodedJWT jwt = verifier.verify(token);
+        if(! jwt.validateToken(token)) {
+            return false;
+        }
 
-            System.out.println("Valid token. Checking roles...");
-            // Verify role access
-            if (method.isAnnotationPresent(RolesAllowed.class)) {
-                RolesAllowed rolesAnnotation = method.getAnnotation(RolesAllowed.class);
-                Set<String> rolesSet = new HashSet<String>(Arrays.asList(rolesAnnotation.value()));
+        // Verify role access
+        if (this.method.isAnnotationPresent(RolesAllowed.class)) {
+            RolesAllowed rolesAnnotation = this.method.getAnnotation(RolesAllowed.class);
+            Set<String> rolesSet = new HashSet<>(Arrays.asList(rolesAnnotation.value()));
+            String role = jwt.getClaim(token,"role");
 
-                if (! rolesSet.contains("temp")) {
-                    return false;
-                }
+            if (! rolesSet.contains(role)) {
+                return false;
             }
-
-        } catch (UnsupportedEncodingException exception) {
-            System.out.println("UTF-8 encoding not supported.");
-            return false;
-        } catch (JWTVerificationException exception) {
-            System.out.println("Invalid signature/claims");
-            return false;
         }
         return true;
     }
 
-    private boolean checkBasicAuth(String[] authorizationHeader, Method method) {
+    private boolean checkBasicAuth(String[] authorizationHeader) {
         String userRole = "User";
 
         String token = decrypt64(authorizationHeader[1]);
@@ -141,18 +129,9 @@ public class AuthenticationFilter implements javax.ws.rs.container.ContainerRequ
         String username = usernameAndPassword[0];
         String password = usernameAndPassword[1];
 
-        // TODO
-        /*
-            1) Do database lookup
-            2) Check User role
-            3) Encrypt incoming password
-            4) Check DB against username + password
-            5) Allow/Deny
-         */
-
         // Verify role access
-        if (method.isAnnotationPresent(RolesAllowed.class)) {
-            RolesAllowed rolesAnnotation = method.getAnnotation(RolesAllowed.class);
+        if (this.method.isAnnotationPresent(RolesAllowed.class)) {
+            RolesAllowed rolesAnnotation = this.method.getAnnotation(RolesAllowed.class);
             Set<String> rolesSet = new HashSet<String>(Arrays.asList(rolesAnnotation.value()));
 
             if (! rolesSet.contains(userRole)) {

@@ -7,6 +7,7 @@ import com.google.gson.JsonObject;
 import me.gerryfletcher.twitter.config.JWTSecret;
 import me.gerryfletcher.twitter.exceptions.BadDataException;
 import me.gerryfletcher.twitter.exceptions.UserSqlException;
+import me.gerryfletcher.twitter.resources.ResourceUtils;
 import me.gerryfletcher.twitter.sqlite.SQLUtils;
 
 import javax.annotation.security.PermitAll;
@@ -59,20 +60,20 @@ public class Register {
             email = processEmail(request.getAsJsonPrimitive("email").getAsString());
             password = processPassword(request.getAsJsonPrimitive("password").getAsString());
         } catch (BadDataException e) {
-            return failed(e.getMessage());
+            return ResourceUtils.failed(e.getMessage());
         }
 
         // Check that the handle and email are not in use
         try {
             veriyUnique(handle, email);
         } catch (UserSqlException e) {
-            return failed(e.getMessage());
+            return ResourceUtils.failed(e.getMessage());
         }
 
         try {
             uid = createUser(handle, displayName, email, password);
         } catch (UserSqlException e) {
-            return failed(e.getMessage());
+            return ResourceUtils.failed(e.getMessage());
         }
 
         return success(handle, displayName, uid);
@@ -205,10 +206,4 @@ public class Register {
         return Password.hashPassword(password);
     }
 
-    private Response failed(String error) {
-        System.out.println("ERROR: " + error);
-        JsonObject returnFail = new JsonObject();
-        returnFail.addProperty("error", error);
-        return Response.status(401).entity(gson.toJson(returnFail)).build();
-    }
 }

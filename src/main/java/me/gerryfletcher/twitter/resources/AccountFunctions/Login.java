@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import me.gerryfletcher.twitter.config.JWTSecret;
+import me.gerryfletcher.twitter.resources.ResourceUtils;
 import me.gerryfletcher.twitter.sqlite.SQLUtils;
 
 import javax.annotation.security.PermitAll;
@@ -40,23 +41,23 @@ public class Login {
         String password = userDetails.get("password").getAsString();
 
         if (handle.isEmpty() || password.isEmpty()) {
-            return failed("Handle or Password is empty.");
+            return ResourceUtils.failed("Handle or Password is empty.");
         }
 
         if (!Password.isPasswordValid(password)) {
-            return failed("Password is not valid.");
+            return ResourceUtils.failed("Password is not valid.");
         }
 
         if (!Handle.isHandleValid(handle)) {
-            return failed("Handle is not valid.");
+            return ResourceUtils.failed("Handle is not valid.");
         }
 
         if (!Handle.doesHandleExist(handle)) {
-            return failed("Handle does not exist.");
+            return ResourceUtils.failed("Handle does not exist.");
         }
 
         if (!isLoginValid(handle, password)) {
-            return failed("Incorrect password.");
+            return ResourceUtils.failed("Incorrect password.");
         }
 
         int userId = Handle.getUserId(handle);
@@ -65,7 +66,7 @@ public class Login {
         String token = new JWTSecret().generateToken(userId, role);
 
         if (token == null) {
-            return failed("Unkown error.");
+            return ResourceUtils.failed("Unkown error.");
         }
 
         JsonObject returnSuccess = new JsonObject();
@@ -98,9 +99,4 @@ public class Login {
         return true;
     }
 
-    private Response failed(String error) {
-        JsonObject returnFail = new JsonObject();
-        returnFail.addProperty("error", error);
-        return Response.status(401).entity(gson.toJson(returnFail)).build();
-    }
 }

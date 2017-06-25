@@ -78,12 +78,13 @@ public class User implements AutoCloseable {
 
     private boolean checkIfIdExists(int id) {
 
-        String sql = "SELECT TOP 1 id FROM users WHERE id = ?";
+        String sql = "SELECT EXISTS(SELECT id FROM users WHERE id = ? LIMIT 1)";
 
         try (PreparedStatement st = conn.prepareStatement(sql)) {
             st.setInt(1, id);
             ResultSet rs = st.executeQuery();
-            return rs.next();
+            rs.next();
+            return rs.getBoolean(1);
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -152,6 +153,23 @@ public class User implements AutoCloseable {
         }
     }
 
+    public String getBio() {
+        String sql = "SELECT bio FROM account_details WHERE id = ?";
+        try (PreparedStatement st = conn.prepareStatement(sql)) {
+            st.setInt(1, this.uid);
+            ResultSet rs = st.executeQuery();
+
+            // The user has a bio
+            if(rs.next()) {
+                return rs.getString(1);
+            } else {
+                return null;
+            }
+        } catch (SQLException e) {
+            return null;
+        }
+    }
+
     /*
         User Statistics
      */
@@ -199,6 +217,7 @@ public class User implements AutoCloseable {
             - UID
             - Handle
             - Display Name
+            - Bio
             - Number of Tweets
             - Number of Followers
             - Number of Following
@@ -208,14 +227,18 @@ public class User implements AutoCloseable {
         try {
             profile.addProperty("uid", this.uid);
             profile.addProperty("handle", getHandle());
+
             profile.addProperty("display_name", getDisplayName());
             profile.addProperty("profile_picture", getProfilePicture());
+            profile.addProperty("bio", getBio());
+
             profile.addProperty("number_of_tweets", getNumberOfTweets());
             profile.addProperty("number_of_followers", getNumberOfFollowers());
             profile.addProperty("number_of_following", getNumberOfFollowing());
         } catch (SQLException e) {
             throw new SQLException("Problem getting user data. " + e.getMessage());
         }
+
 
         return profile;
     }

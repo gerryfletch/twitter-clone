@@ -121,7 +121,7 @@ public class AuthenticationFilter implements javax.ws.rs.container.ContainerRequ
         if (this.method.isAnnotationPresent(RolesAllowed.class)) {
             RolesAllowed rolesAnnotation = this.method.getAnnotation(RolesAllowed.class);
             Set<String> rolesSet = new HashSet<>(Arrays.asList(rolesAnnotation.value()));
-            String role = jwt.getClaim(token,"role");
+            String role = jwt.getStringClaim(token,"role");
 
             if (! rolesSet.contains(role)) {
                 return false;

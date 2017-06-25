@@ -125,11 +125,11 @@ public class RegisterResource {
                 String resultEmail = resultSet.getString("email").toLowerCase();
                 String resultHandle = resultSet.getString("handle");
 
-                if (resultEmail.equals(email) && resultHandle.equals(handle)) {
+                if (resultEmail.equals(email) && resultHandle.equalsIgnoreCase(handle)) {
                     throw new UserSqlException("Account already exists with this username or email.");
                 } else if (resultEmail.equals(email)) {
                     throw new UserSqlException("Account already exists with this email.");
-                } else if (resultHandle.equals(handle)) {
+                } else if (resultHandle.equalsIgnoreCase(handle)) {
                     throw new UserSqlException("Account already exists with this handle.");
                 }
             }

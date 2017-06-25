@@ -56,7 +56,7 @@ public class SQLUtils {
         try (Connection conn = connect();
              PreparedStatement st = conn.prepareStatement(sql)) {
             for(int i = 0; i < 10; i++) {
-                String role = "UserResource";
+                String role = "User";
                 String handle = names[i].toLowerCase();
                 String display_name = "_" + names[i];
                 String email = names[i].toLowerCase() + "@gmail.com";

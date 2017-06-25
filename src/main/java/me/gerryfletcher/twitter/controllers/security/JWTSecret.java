@@ -6,11 +6,13 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
 import javax.crypto.SecretKey;
 import java.io.UnsupportedEncodingException;
 import java.sql.Date;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class JWTSecret implements SecretKey{
@@ -83,13 +85,33 @@ public class JWTSecret implements SecretKey{
         return null;
     }
 
+    public Map<String, Claim> getClaims(String token) {
+        try {
+            DecodedJWT jwt = JWT.decode(token);
+            return jwt.getClaims();
+        } catch (JWTDecodeException e) {
+            System.out.println("Invalid token.");
+            return null;
+        }
+    }
+
+    public Claim getClaim(String token, String claim) {
+        try {
+            DecodedJWT jwt = JWT.decode(token);
+            return jwt.getClaim(claim);
+        } catch (JWTDecodeException e) {
+            System.out.println("Invalid token.");
+            return null;
+        }
+    }
+
     /**
-     * Helper method to return a claim. Examples: uid, role, handle, date
+     * Helper method to return a single <b>String </b>claim. Examples: uid, role, handle, date
      * @param token JWT
      * @param claim Claim (key) to look for - Case Sensitive
      * @return      The claims value
      */
-    public String getClaim(String token, String claim) {
+    public String getStringClaim(String token, String claim) {
         try {
             DecodedJWT jwt = JWT.decode(token);
             return jwt.getClaim(claim).asString();

@@ -1,6 +1,7 @@
 package me.gerryfletcher.twitter.controllers.user;
 
 import me.gerryfletcher.twitter.controllers.sqlite.SQLUtils;
+import me.gerryfletcher.twitter.exceptions.BadDataException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -71,6 +72,21 @@ public class Handle {
             System.out.println(e.getMessage());
         }
         return -1;
+    }
+
+    public static String getUserHandle(int uid) throws BadDataException {
+        String query = "SELECT handle FROM users WHERE id = ?";
+        try(PreparedStatement st = SQLUtils.connect().prepareStatement(query)) {
+            st.setInt(1, uid);
+            ResultSet rs = st.executeQuery();
+            if(rs.next()) {
+                return rs.getString(1);
+            }
+            throw new BadDataException("Invalid UID.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new BadDataException("Invalid UID.");
+        }
     }
 
     /*

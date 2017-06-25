@@ -18,6 +18,11 @@ public class ResourceUtils {
             .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
             .create();
 
+    /**
+        Returns a Response of status 401 Unauthorized with a String error.
+        @param error A user-friendly error.
+        @return 401 Unauthorized response with JSON error in body.
+     **/
     public static Response failed(String error) {
         System.out.println("ERROR: " + error);
         JsonObject returnFail = new JsonObject();
@@ -25,6 +30,9 @@ public class ResourceUtils {
         return Response.status(401).entity(gson.toJson(returnFail)).build();
     }
 
+    /*
+
+     */
     public static Response failed(String error, int status) {
         System.out.println("ERROR: " + error);
         JsonObject returnFail = new JsonObject();

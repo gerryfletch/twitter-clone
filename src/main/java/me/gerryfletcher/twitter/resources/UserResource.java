@@ -47,12 +47,10 @@ public class UserResource {
         }
 
         try(User user = new User(handle)) {
-
+            JsonObject profile = user.getProfile();
+            return Response.ok().entity(gson.toJson(profile)).build();
         } catch (BadDataException | SQLException e) {
-            return ResourceUtils.failed("Something went wrong.");
+            return ResourceUtils.failed(e.getMessage(), 403); // Return forbidden
         }
-
-
-        return Response.ok().build();
     }
 }

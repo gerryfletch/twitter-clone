@@ -1,6 +1,6 @@
-package me.gerryfletcher.twitter.resources.AccountFunctions;
+package me.gerryfletcher.twitter.controllers.user;
 
-import me.gerryfletcher.twitter.sqlite.SQLUtils;
+import me.gerryfletcher.twitter.controllers.sqlite.SQLUtils;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,10 +15,10 @@ import java.util.regex.Pattern;
 public class Handle {
 
     /* Usernames must:
-        1) Match characters and symbols in the list: a-z, 0-9, underscore, hyphen
+        1) Match characters and symbols in the list: a-z, A-Z, 0-9, underscore, hyphen
         2) Be at least 3 characters long, and a maximum of 15
     */
-    private static final String USERNAME_PATTERN = "^[a-z0-9_-]{3,15}$";
+    private static final String USERNAME_PATTERN = "^[a-zA-Z0-9_-]{3,15}$";
 
     private static Pattern pattern;
     private static Matcher matcher;

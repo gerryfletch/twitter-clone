@@ -4,11 +4,13 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-import me.gerryfletcher.twitter.config.JWTSecret;
+import me.gerryfletcher.twitter.controllers.security.JWTSecret;
+import me.gerryfletcher.twitter.controllers.user.Handle;
+import me.gerryfletcher.twitter.controllers.user.Password;
 import me.gerryfletcher.twitter.exceptions.BadDataException;
 import me.gerryfletcher.twitter.exceptions.UserSqlException;
-import me.gerryfletcher.twitter.resources.ResourceUtils;
-import me.gerryfletcher.twitter.sqlite.SQLUtils;
+import me.gerryfletcher.twitter.controllers.utils.ResourceUtils;
+import me.gerryfletcher.twitter.controllers.sqlite.SQLUtils;
 
 import javax.annotation.security.PermitAll;
 import javax.ws.rs.*;
@@ -26,7 +28,7 @@ import java.util.regex.Pattern;
  */
 
 @Path("register")
-public class Register {
+public class RegisterResource {
 
     private Gson gson = new GsonBuilder()
             .setPrettyPrinting()
@@ -49,45 +51,45 @@ public class Register {
         JsonObject request = gson.fromJson(json, JsonObject.class);
 
         String handle;
-        String displayName;
+        String display_name;
         String email;
         String password;
         int uid;
         // Check that form data is valid
         try {
             handle = processHandle(request.getAsJsonPrimitive("handle").getAsString());
-            displayName = processDisplayName(request.getAsJsonPrimitive("displayName").getAsString());
+            display_name = processDisplayName(request.getAsJsonPrimitive("display_name").getAsString());
             email = processEmail(request.getAsJsonPrimitive("email").getAsString());
             password = processPassword(request.getAsJsonPrimitive("password").getAsString());
         } catch (BadDataException e) {
-            return ResourceUtils.failed(e.getMessage());
+            return ResourceUtils.failed(e.getMessage(), 400);
         }
 
         // Check that the handle and email are not in use
         try {
             veriyUnique(handle, email);
         } catch (UserSqlException e) {
-            return ResourceUtils.failed(e.getMessage());
+            return ResourceUtils.failed("Handle or Email in use.", 403);
         }
 
         try {
-            uid = createUser(handle, displayName, email, password);
+            uid = createUser(handle, display_name, email, password);
         } catch (UserSqlException e) {
-            return ResourceUtils.failed(e.getMessage());
+            return ResourceUtils.failed("Problem creating user.", 403);
         }
 
-        return success(handle, displayName, uid);
+        return success(handle, display_name, uid);
     }
 
-    private Response success(String handle, String displayName, int uid) {
+    private Response success(String handle, String display_name, int uid) {
         JsonObject returnSuccess = new JsonObject();
 
         JWTSecret jwtSecret = new JWTSecret();
-        String token = jwtSecret.generateToken(uid, "User");
+        String token = jwtSecret.generateToken(uid, "UserResource");
 
         returnSuccess.addProperty("uid", uid);
         returnSuccess.addProperty("handle", handle);
-        returnSuccess.addProperty("displayName", displayName);
+        returnSuccess.addProperty("display_name", display_name);
         returnSuccess.addProperty("token", token);
 
         return Response.ok().entity(gson.toJson(returnSuccess)).build();
@@ -127,12 +129,12 @@ public class Register {
         }
     }
 
-    private int createUser(String handle, String displayName, String email, String password) throws UserSqlException {
+    private int createUser(String handle, String display_name, String email, String password) throws UserSqlException {
 
         String registerSql =
                 "INSERT INTO users ("
                         + "handle,"
-                        + "displayName,"
+                        + "display_name,"
                         + "email,"
                         + "password,"
                         + "role"
@@ -142,7 +144,7 @@ public class Register {
         try (PreparedStatement registerUser = this.conn.prepareStatement(registerSql)) {
 
             registerUser.setString(1, handle);
-            registerUser.setString(2, displayName);
+            registerUser.setString(2, display_name);
             registerUser.setString(3, email);
             registerUser.setString(4, password);
 
@@ -163,19 +165,18 @@ public class Register {
     }
 
     private String processHandle(String handle) throws BadDataException {
-        handle = handle.toLowerCase();
         if (!Handle.isHandleValid(handle)) {
             throw new BadDataException("Username is not valid.");
         }
         return handle;
     }
 
-    private String processDisplayName(String displayName) throws BadDataException {
-        if (displayName.length() < 3 || displayName.length() > 15) {
+    private String processDisplayName(String display_name) throws BadDataException {
+        if (display_name.length() < 3 || display_name.length() > 15) {
             throw new BadDataException("Display name is bad length.");
         }
 
-        return displayName;
+        return display_name;
     }
 
     private String processEmail(String email) throws BadDataException {

@@ -1,6 +1,6 @@
-package me.gerryfletcher.twitter.sqlite;
+package me.gerryfletcher.twitter.controllers.sqlite;
 
-import me.gerryfletcher.twitter.resources.AccountFunctions.Password;
+import me.gerryfletcher.twitter.controllers.user.Password;
 
 import java.sql.*;
 
@@ -9,20 +9,8 @@ import java.sql.*;
  */
 public class SQLUtils {
 
-    public static void connectToDatabase() {
-        Connection conn = SQLUtils.connect();
-
-        try {
-            if (conn != null) {
-                conn.close();
-            }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-    }
-
     public static Connection connect() {
-        String url = "jdbc:sqlite:E:/sqlite/temp";
+        String url = "jdbc:sqlite:E:/sqlite/twitter/twitter_db.db";
         Connection conn = null;
         try {
             conn = DriverManager.getConnection(url);
@@ -42,7 +30,7 @@ public class SQLUtils {
         String createTable = "CREATE TABLE IF NOT EXISTS " + tableName +" (\n"
                 + " id integer PRIMARY KEY AUTOINCREMENT,\n"
                 + " handle varchar NOT NULL,\n"
-                + " displayName varchar NOT NULL,\n"
+                + " display_name varchar NOT NULL,\n"
                 + " email varchar NOT NULL,\n"
                 + " password CHAR(60) NOT NULL,\n"
                 + " role varchar NOT NULL"
@@ -63,14 +51,14 @@ public class SQLUtils {
     public static void populateUsersTable() {
         String[] names = {"Gerry", "Lauren", "Cathy", "Rob", "Ruben", "Istannen", "Bosco", "Ben", "Dan", "Lucy"};
 
-        String sql = "INSERT INTO users(handle, displayName, email, password, role) VALUES(?,?,?,?,?)";
+        String sql = "INSERT INTO users(handle, display_name, email, password, role) VALUES(?,?,?,?,?)";
 
         try (Connection conn = connect();
              PreparedStatement st = conn.prepareStatement(sql)) {
             for(int i = 0; i < 10; i++) {
-                String role = "User";
+                String role = "UserResource";
                 String handle = names[i].toLowerCase();
-                String displayName = "_" + names[i];
+                String display_name = "_" + names[i];
                 String email = names[i].toLowerCase() + "@gmail.com";
                 int id = i + 1;
                 String password = "Passw0rd" + id;
@@ -81,7 +69,7 @@ public class SQLUtils {
                 }
 
                 st.setString(1, handle);
-                st.setString(2, displayName);
+                st.setString(2, display_name);
                 st.setString(3, email);
                 st.setString(4, hashedPassword);
                 st.setString(5, role);
@@ -103,7 +91,7 @@ public class SQLUtils {
                 System.out.println(rs.getInt("id") + "  |  "
                         + rs.getString("handle")
                         + "  |  "
-                        + rs.getString("displayName")
+                        + rs.getString("display_name")
                         + "  |  "
                         + rs.getString("email")
                         + "  |  "

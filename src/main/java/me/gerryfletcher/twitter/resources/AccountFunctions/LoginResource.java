@@ -4,9 +4,11 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-import me.gerryfletcher.twitter.config.JWTSecret;
-import me.gerryfletcher.twitter.resources.ResourceUtils;
-import me.gerryfletcher.twitter.sqlite.SQLUtils;
+import me.gerryfletcher.twitter.controllers.security.JWTSecret;
+import me.gerryfletcher.twitter.controllers.user.Handle;
+import me.gerryfletcher.twitter.controllers.user.Password;
+import me.gerryfletcher.twitter.controllers.utils.ResourceUtils;
+import me.gerryfletcher.twitter.controllers.sqlite.SQLUtils;
 
 import javax.annotation.security.PermitAll;
 import javax.ws.rs.Consumes;
@@ -21,7 +23,7 @@ import java.sql.*;
  * Created by Gerry on 09/06/2017.
  */
 @Path("/login")
-public class Login {
+public class LoginResource {
 
     private Gson gson = new GsonBuilder()
             .setPrettyPrinting()
@@ -35,7 +37,7 @@ public class Login {
     @Produces(MediaType.APPLICATION_JSON)
     @PermitAll
     public Response attemptLogin(String json) {
-        System.out.println("Login attempted: " + json);
+        System.out.println("LoginResource attempted: " + json);
         JsonObject userDetails = gson.fromJson(json, JsonObject.class);
         String handle = userDetails.get("handle").getAsString();
         String password = userDetails.get("password").getAsString();
@@ -71,6 +73,8 @@ public class Login {
 
         JsonObject returnSuccess = new JsonObject();
         returnSuccess.addProperty("authenticated", true);
+        returnSuccess.addProperty("handle", handle);
+        returnSuccess.addProperty("uid", userId);
         returnSuccess.addProperty("token", token);
 
         System.out.println("[" + role + "] " + handle + " just logged in.");

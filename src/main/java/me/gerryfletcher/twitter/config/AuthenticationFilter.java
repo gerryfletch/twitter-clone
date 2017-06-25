@@ -1,6 +1,5 @@
 package me.gerryfletcher.twitter.config;
 
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -14,12 +13,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTDecodeException;
-import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.auth0.jwt.interfaces.DecodedJWT;
+import me.gerryfletcher.twitter.controllers.security.JWTSecret;
 import org.glassfish.jersey.internal.util.Base64;
 
 /**
@@ -116,7 +110,7 @@ public class AuthenticationFilter implements javax.ws.rs.container.ContainerRequ
     }
 
     private boolean checkBasicAuth(String[] authorizationHeader) {
-        String userRole = "User";
+        String userRole = "UserResource";
 
         String token = decrypt64(authorizationHeader[1]);
 

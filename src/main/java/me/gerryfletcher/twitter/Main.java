@@ -1,14 +1,12 @@
 package me.gerryfletcher.twitter;
 
 import me.gerryfletcher.twitter.config.CustomConfig;
-import me.gerryfletcher.twitter.sqlite.SQLUtils;
+import me.gerryfletcher.twitter.controllers.sqlite.SQLUtils;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.http.server.StaticHttpHandler;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
-
-import java.sql.*;
 
 import java.io.IOException;
 import java.net.URI;

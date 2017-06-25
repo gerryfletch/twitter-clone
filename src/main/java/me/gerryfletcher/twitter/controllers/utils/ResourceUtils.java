@@ -1,4 +1,4 @@
-package me.gerryfletcher.twitter.resources;
+package me.gerryfletcher.twitter.controllers.utils;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
@@ -23,5 +23,12 @@ public class ResourceUtils {
         JsonObject returnFail = new JsonObject();
         returnFail.addProperty("error", error);
         return Response.status(401).entity(gson.toJson(returnFail)).build();
+    }
+
+    public static Response failed(String error, int status) {
+        System.out.println("ERROR: " + error);
+        JsonObject returnFail = new JsonObject();
+        returnFail.addProperty("error", error);
+        return Response.status(status).entity(gson.toJson(returnFail)).build();
     }
 }

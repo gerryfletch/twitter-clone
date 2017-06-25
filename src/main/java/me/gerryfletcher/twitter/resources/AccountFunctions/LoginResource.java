@@ -19,9 +19,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.sql.*;
 
-/**
- * Created by Gerry on 09/06/2017.
- */
 @Path("/login")
 public class LoginResource {
 
@@ -32,15 +29,29 @@ public class LoginResource {
             .create();
 
 
+    /**
+     * Checks if a login is valid, verifies it against the DB and
+     * creates a JSON web token to be included in the response for
+     * local storage in the browser.
+     * @param json  JSON made up of username + password
+     * @return      200 OK and JWT if successful, or a 401 Unauthorized
+     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @PermitAll
     public Response attemptLogin(String json) {
-        System.out.println("LoginResource attempted: " + json);
+        System.out.println("Login attempted: " + json);
+
         JsonObject userDetails = gson.fromJson(json, JsonObject.class);
+
         String handle = userDetails.get("handle").getAsString();
         String password = userDetails.get("password").getAsString();
+
+        /*
+         *  Checks for each data type, returning a user-friendly error
+         *  and 401 Unauthorized HTTP response code
+         */
 
         if (handle.isEmpty() || password.isEmpty()) {
             return ResourceUtils.failed("Handle or Password is empty.");
@@ -65,6 +76,9 @@ public class LoginResource {
         int userId = Handle.getUserId(handle);
         String role = Handle.getUserRole(handle);
 
+        /*
+            Generate the JSON Web Token with ID and Role in the payload
+         */
         String token = new JWTSecret().generateToken(userId, role);
 
         if (token == null) {
@@ -82,6 +96,12 @@ public class LoginResource {
         return Response.status(200).entity(gson.toJson(returnSuccess)).build();
     }
 
+    /**
+     * Checks the plaintext password against the hashed password in the DB.
+     * @param handle    The users handle.
+     * @param password  The users plaintext password.
+     * @return          True/False on matching passwords.
+     */
     private boolean isLoginValid(String handle, String password) {
         String query = "SELECT password FROM users WHERE handle= ?";
         try (Connection conn = SQLUtils.connect();

@@ -6,22 +6,26 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Created by Gerry on 10/06/2017.
- */
 public class Password {
 
     private static int workload = 12;
 
+    /**
+     * @param password_plainText    Unmodified plaintext password.
+     * @return                      Salted password (using BCrypt)
+     */
     public static String hashPassword(String password_plainText) {
         String salt = BCrypt.gensalt(workload);
-        String hashed_password = BCrypt.hashpw(password_plainText, salt);
-
-        return(hashed_password);
+        return BCrypt.hashpw(password_plainText, salt);
     }
 
+    /**
+     * @param password_plaintext    Unmodified plaintext password
+     * @param stored_hash           The existing hashed password
+     * @return                      True/False if the passwords match
+     */
     public static boolean checkPassword(String password_plaintext, String stored_hash) {
-        boolean password_verified = false;
+        boolean password_verified;
 
         if(null == stored_hash || !stored_hash.startsWith("$2a$"))
             throw new java.lang.IllegalArgumentException("Invalid hash provided for comparison");
@@ -44,11 +48,6 @@ public class Password {
 
     public static boolean isPasswordValid(String password) {
         Matcher matcher = pattern.matcher(password);
-
-        if(! matcher.matches()) {
-            return false;
-        }
-
-        return true;
+        return matcher.matches();
     }
 }

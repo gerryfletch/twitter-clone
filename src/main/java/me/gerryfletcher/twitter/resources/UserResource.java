@@ -17,9 +17,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 import java.sql.SQLException;
 
-/**
- * Created by Gerry on 09/06/2017.
- */
 @Path("user")
 public class UserResource {
 
@@ -29,13 +26,15 @@ public class UserResource {
             .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
             .create();
 
-    /*
-        Returns a users public profile data:
-            - Display name
-            - Uid
-            - Number of tweets
-            - Number of followers
-            - Number of following
+    /**
+     * Returns a users public profile data:
+     *  - Display name
+     *  - Uid
+     *  - Number of tweets
+     *  - Number of followers
+     *  - Number of following
+     * @param handle    The users handle.
+     * @return  Response 200 OK with the profile in JSON, 404 not found, or 403 forbidden if there is another error.
      */
     @Path("{handle}")
     @PermitAll

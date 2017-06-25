@@ -34,6 +34,21 @@ public class AuthenticationFilter implements javax.ws.rs.container.ContainerRequ
 
     private Method method;
 
+    /**
+     * The filter checks all incoming HTTP requests.
+     * If the resource has a PermitAll or DenyAll annotation, the request will be
+     * passed or rejected with no further checks.
+     *
+     * If there is no authorization present at all, it is rejected unauthorized.
+     *
+     * The filter then checks for basic and bearer authentication.
+     * Basic auth is no longer used, but the helper methods are still available for
+     * future expansion.
+     *
+     * If the user does not have the correct permissions, they are aborted unauthorized.
+     *
+     * @param requestContext    The HTTP request.
+     */
     @Override
     public void filter(ContainerRequestContext requestContext) {
 
@@ -84,10 +99,16 @@ public class AuthenticationFilter implements javax.ws.rs.container.ContainerRequ
 
         if(! authorized) {
             requestContext.abortWith(ACCESS_UNAUTHORIZED);
-            return;
         }
     }
 
+    /**
+     * Checks a Json Web Token for validity.
+     * The role claim is extracted from the JWT, and checked against the role set for
+     * the resource.
+     * @param token The Json Web Token supplied.
+     * @return  True or False if the user is verified.
+     */
     private boolean checkBearerAuth(String token) {
         JWTSecret jwt = new JWTSecret();
         System.out.println("TOKEN: " + token);
@@ -109,10 +130,18 @@ public class AuthenticationFilter implements javax.ws.rs.container.ContainerRequ
         return true;
     }
 
+    /**
+     * <b>This method is no longer used as bearer auth is used instead.</b>
+     * Checks the username and password against the DB.
+     * DB functions have been removed, and checks if username is 'admin' and
+     * password is 'password'.
+     * @param authorizationHeader   The authorization header to be split.
+     * @return  True or False if the user is verified.
+     */
     private boolean checkBasicAuth(String[] authorizationHeader) {
         String userRole = "UserResource";
 
-        String token = decrypt64(authorizationHeader[1]);
+        String token = decode64(authorizationHeader[1]);
 
         String[] usernameAndPassword = token.split(":");
 
@@ -126,21 +155,22 @@ public class AuthenticationFilter implements javax.ws.rs.container.ContainerRequ
         // Verify role access
         if (this.method.isAnnotationPresent(RolesAllowed.class)) {
             RolesAllowed rolesAnnotation = this.method.getAnnotation(RolesAllowed.class);
-            Set<String> rolesSet = new HashSet<String>(Arrays.asList(rolesAnnotation.value()));
+            Set<String> rolesSet = new HashSet<>(Arrays.asList(rolesAnnotation.value()));
 
             if (! rolesSet.contains(userRole)) {
                 return false;
             }
         }
 
-        if (!(username.equals("admin") && password.equals("password"))) {
-            return false;
-        }
-
-        return true;
+        return username.equals("admin") && password.equals("password");
     }
 
-    private String decrypt64(String s) {
-        return new String(Base64.decode(s.getBytes()));
+    /**
+     * Helper function to decode base 64 strings.
+     * @param str   The base 64 encoded string
+     * @return      The decoded string.
+     */
+    private String decode64(String str) {
+        return new String(Base64.decode(str.getBytes()));
     }
 }

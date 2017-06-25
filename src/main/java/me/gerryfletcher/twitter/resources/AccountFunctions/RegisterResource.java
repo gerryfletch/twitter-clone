@@ -23,10 +23,6 @@ import java.sql.SQLException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Created by Gerry on 10/06/2017.
- */
-
 @Path("register")
 public class RegisterResource {
 
@@ -39,9 +35,10 @@ public class RegisterResource {
 
     private Connection conn = SQLUtils.connect();
 
-    /*
-        SELECT user id
-        Generate JWT
+    /**
+     * Attempts to create a user.
+     * @param json  JSON containing handle, display name, email and password.
+     * @return 200 OK with JWT, or 403 Forbidden if failed.
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -81,6 +78,13 @@ public class RegisterResource {
         return success(handle, display_name, uid);
     }
 
+    /**
+     * Creates a sucessful response.
+     * @param handle The users handle.
+     * @param display_name The users display name.
+     * @param uid The users unique ID.
+     * @return 200OK Response with JSON holding the JWT.
+     */
     private Response success(String handle, String display_name, int uid) {
         JsonObject returnSuccess = new JsonObject();
 
@@ -95,6 +99,13 @@ public class RegisterResource {
         return Response.ok().entity(gson.toJson(returnSuccess)).build();
     }
 
+    /**
+     * Checks that a registering user is unique, by looking up the username and email
+     * in the DB.
+     * @param handle    The users handle.
+     * @param email     The users email.
+     * @throws UserSqlException if an account already exists.
+     */
     private void veriyUnique(String handle, String email) throws UserSqlException {
         String checkSql =
                 "SELECT id, handle, email "
@@ -129,6 +140,15 @@ public class RegisterResource {
         }
     }
 
+    /**
+     * Creates the new user in the database.
+     * @param handle    The users handle.
+     * @param display_name  The users display name.
+     * @param email The users email.
+     * @param password  The users Hashed password.
+     * @return  The newly created users ID.
+     * @throws UserSqlException If there is a problem creating the user.
+     */
     private int createUser(String handle, String display_name, String email, String password) throws UserSqlException {
 
         String registerSql =
@@ -164,13 +184,25 @@ public class RegisterResource {
         }
     }
 
+    /**
+     * Uses the Handle class to check that the handle is valid.
+     * @param handle    The users handle.
+     * @return  The handle (if it is valid.)
+     * @throws BadDataException If the handle is not valid.
+     */
     private String processHandle(String handle) throws BadDataException {
         if (!Handle.isHandleValid(handle)) {
-            throw new BadDataException("Username is not valid.");
+            throw new BadDataException("Handle is not valid.");
         }
         return handle;
     }
 
+    /**
+     * The Display Name can be any characters, it just has a length limit of 3-15.
+     * @param display_name  The users display name.
+     * @return  The display name (if it is valid).
+     * @throws BadDataException If the display name is not valid.
+     */
     private String processDisplayName(String display_name) throws BadDataException {
         if (display_name.length() < 3 || display_name.length() > 15) {
             throw new BadDataException("Display name is bad length.");
@@ -179,6 +211,12 @@ public class RegisterResource {
         return display_name;
     }
 
+    /**
+     * Uses a 99.99% accurate email regex to validate it.
+     * @param email The users email.
+     * @return  The email (if it is valid).
+     * @throws BadDataException If the email is not valid.
+     */
     private String processEmail(String email) throws BadDataException {
         /*
             Email regex:
@@ -199,6 +237,12 @@ public class RegisterResource {
         return email;
     }
 
+    /**
+     * Uses the Password class to validate the password.
+     * @param password  The users plaintext password.
+     * @return  The users hashed password (if it is valid).
+     * @throws BadDataException If the password is not valid.
+     */
     private String processPassword(String password) throws BadDataException {
         if (!Password.isPasswordValid(password)) {
             throw new BadDataException("Badly formatted password.");

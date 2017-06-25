@@ -4,7 +4,7 @@ import org.glassfish.jersey.filter.LoggingFilter;
 import org.glassfish.jersey.server.ResourceConfig;
 
 /**
- * Created by Gerry on 08/06/2017.
+ * The Custom Config loaded. Includes the HTTP filter on startup.
  */
 public class CustomConfig  extends ResourceConfig{
     public CustomConfig() {

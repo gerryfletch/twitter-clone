@@ -3,7 +3,8 @@ package me.gerryfletcher.twitter.exceptions;
 import java.sql.SQLException;
 
 /**
- * Created by Gerry on 27/06/2017.
+ * The UserNotExistsException is used when a query
+ * doesn't return a user.
  */
 public class UserNotExistsException extends SQLException {
     public UserNotExistsException(String message) {

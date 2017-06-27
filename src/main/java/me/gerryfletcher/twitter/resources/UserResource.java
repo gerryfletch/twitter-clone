@@ -31,17 +31,18 @@ public class UserResource {
 
     /**
      * Returns a users public profile data:
-     *  - Display name
-     *  - Uid
-     *  - Number of tweets
-     *  - Number of followers
-     *  - Number of following
+     * - Display name
+     * - Profile Picture
+     * - Bio
+     * - Uid
+     * - Number of tweets
+     * - Number of followers
+     * - Number of following
+     * - If this is the users profile
+     * - If you are following this user
      *
-     *  - If this is the users profile
-     *  - If you are following this user
-     *
-     * @param handle    The users handle.
-     * @return  Response 200 OK with the profile in JSON, 404 not found, or 403 forbidden if there is another error.
+     * @param handle The users handle.
+     * @return Response 200 OK with the profile in JSON, 404 not found, or 403 forbidden if there is another error.
      */
     @Path("{handle}")
     @RolesAllowed("User")
@@ -53,11 +54,9 @@ public class UserResource {
         }
 
         try {
-
             UserService us = UserService.getInstance();
             int uid = us.getUserId(handle);
             JsonObject profile = us.getJsonProfile(uid);
-
             return Response.ok().entity(gson.toJson(profile)).build();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -65,6 +64,13 @@ public class UserResource {
         }
     }
 
+    /**
+     * This initial GET checks if the user who sent the request
+     * is the same as the path handle.
+     * @param auth  The JWT Bearer authentication sent in the HTTP request.
+     * @param handle    The handle to be edited.
+     * @return  Response 200 OK if it is fine, or unauthorized.
+     */
     @Path("{handle}/edit")
     @RolesAllowed("User")
     @GET
@@ -76,7 +82,7 @@ public class UserResource {
             int headerUID = jwtSecret.getClaim(token, "uid").asInt(); // User ID
             String headerHandle = Handle.getUserHandle(headerUID);
 
-            if(! headerHandle.equals(handle)) {
+            if (!headerHandle.equals(handle)) {
                 JsonObject response = new JsonObject();
                 response.addProperty("handle", handle);
                 return Response

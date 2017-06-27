@@ -120,14 +120,10 @@ public class UserService {
     */
     public JsonObject getJsonProfile(int uid) throws SQLException {
 
-        System.out.println("Get json profile called");
-
         JsonObject profile = new JsonObject();
 
         get_user_profile.setInt(1, uid);
         ResultSet user = get_user_profile.executeQuery();
-
-        System.out.println("getting user");
 
         if (user.next()) {
             profile.addProperty("uid", uid);
@@ -138,21 +134,20 @@ public class UserService {
         } else {
             throw new UserNotExistsException("User " + uid + " does not exist.");
         }
-        System.out.println("Getting stats");
 
-        JsonArray statisticsArray = new JsonArray();
+        profile.add("statistics", getProfileStatistics(uid));
 
+        return profile;
+
+    }
+
+    private JsonObject getProfileStatistics(int uid) throws SQLException {
         JsonObject statistics = new JsonObject();
         statistics.addProperty("number_of_tweets", getNumberOfTweets(uid));
         statistics.addProperty("number_of_followers", getNumberOfFollowers(uid));
         statistics.addProperty("number_of_following", getNumberOfFollowers(uid));
 
-        statisticsArray.add(statistics);
-
-        profile.add("statistics", statistics);
-
-        return profile;
-
+        return statistics;
     }
 
 

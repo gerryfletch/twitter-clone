@@ -1,8 +1,11 @@
 package me.gerryfletcher.twitter.controllers.user;
 
+import me.gerryfletcher.twitter.controllers.security.HTTPRequestUtil;
+import me.gerryfletcher.twitter.controllers.security.JWTSecret;
 import me.gerryfletcher.twitter.controllers.sqlite.SQLUtils;
 import me.gerryfletcher.twitter.exceptions.BadDataException;
 
+import javax.ws.rs.core.Response;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -104,5 +107,17 @@ public class Handle {
             System.out.println(e.getMessage());
         }
         return null;
+    }
+
+    /**
+     * Get a users handle from the authorization header.
+     * @param auth  The Authorization Header parameter of a HTTP request.
+     * @return  The String handle.
+     */
+    public static String getHandleFromAuth(String auth) throws BadDataException {
+        String token = HTTPRequestUtil.getJWT(auth);
+        JWTSecret jwt = new JWTSecret();
+        int uid = jwt.getClaim(token, "uid").asInt();
+        return getUserHandle(uid);
     }
 }

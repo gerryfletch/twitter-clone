@@ -7,11 +7,11 @@ import com.google.gson.JsonObject;
 import me.gerryfletcher.twitter.controllers.security.HTTPRequestUtil;
 import me.gerryfletcher.twitter.controllers.security.JWTSecret;
 import me.gerryfletcher.twitter.controllers.user.Handle;
-import me.gerryfletcher.twitter.controllers.user.User;
+import me.gerryfletcher.twitter.models.User;
 import me.gerryfletcher.twitter.controllers.utils.ResourceUtils;
 import me.gerryfletcher.twitter.exceptions.BadDataException;
+import me.gerryfletcher.twitter.services.UserService;
 
-import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -36,22 +36,31 @@ public class UserResource {
      *  - Number of tweets
      *  - Number of followers
      *  - Number of following
+     *
+     *  - If this is the users profile
+     *  - If you are following this user
+     *
      * @param handle    The users handle.
      * @return  Response 200 OK with the profile in JSON, 404 not found, or 403 forbidden if there is another error.
      */
     @Path("{handle}")
-    @PermitAll
+    @RolesAllowed("User")
     @GET
-    public Response getUserProfile(@PathParam("handle") String handle) {
+    public Response getUserProfile(@HeaderParam("authorization") String auth, @PathParam("handle") String handle) {
 
         if (!Handle.doesHandleExist(handle.toLowerCase())) {
-            return Response.status(404).build();
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
 
-        try(User user = new User(111)) {
-            JsonObject profile = user.getProfile();
+        try {
+
+            UserService us = UserService.getInstance();
+            int uid = us.getUserId(handle);
+            JsonObject profile = us.getJsonProfile(uid);
+
             return Response.ok().entity(gson.toJson(profile)).build();
-        } catch (BadDataException | SQLException e) {
+        } catch (SQLException e) {
+            e.printStackTrace();
             return ResourceUtils.failed(e.getMessage(), 403); // Return forbidden
         }
     }
@@ -68,15 +77,19 @@ public class UserResource {
             String headerHandle = Handle.getUserHandle(headerUID);
 
             if(! headerHandle.equals(handle)) {
-                return ResourceUtils.failed("Bad credential. Redirect user to /handle.", 401);
+                JsonObject response = new JsonObject();
+                response.addProperty("handle", handle);
+                return Response
+                        .status(Response.Status.UNAUTHORIZED)
+                        .entity(gson.toJson(response))
+                        .build();
             } else {
-                System.out.println("returning true");
                 return Response.ok().build();
             }
 
         } catch (BadDataException e) {
             e.printStackTrace();
-            return Response.status(400).build();
+            return Response.status(Response.Status.BAD_REQUEST).build();
         }
     }
 }

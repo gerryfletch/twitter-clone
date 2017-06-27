@@ -145,7 +145,7 @@ public class UserService {
         JsonObject statistics = new JsonObject();
         statistics.addProperty("number_of_tweets", getNumberOfTweets(uid));
         statistics.addProperty("number_of_followers", getNumberOfFollowers(uid));
-        statistics.addProperty("number_of_following", getNumberOfFollowers(uid));
+        statistics.addProperty("number_of_following", getNumberOfFollowing(uid));
 
         return statistics;
     }

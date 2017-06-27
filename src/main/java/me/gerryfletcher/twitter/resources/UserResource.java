@@ -4,12 +4,14 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import me.gerryfletcher.twitter.controllers.relationships.RelationshipType;
 import me.gerryfletcher.twitter.controllers.security.HTTPRequestUtil;
 import me.gerryfletcher.twitter.controllers.security.JWTSecret;
 import me.gerryfletcher.twitter.controllers.user.Handle;
 import me.gerryfletcher.twitter.models.User;
 import me.gerryfletcher.twitter.controllers.utils.ResourceUtils;
 import me.gerryfletcher.twitter.exceptions.BadDataException;
+import me.gerryfletcher.twitter.services.RelationshipService;
 import me.gerryfletcher.twitter.services.UserService;
 
 import javax.annotation.security.RolesAllowed;
@@ -47,16 +49,24 @@ public class UserResource {
     @Path("{handle}")
     @RolesAllowed("User")
     @GET
-    public Response getUserProfile(@HeaderParam("authorization") String auth, @PathParam("handle") String handle) {
+    public Response getUserProfile(@HeaderParam("authorization") String auth, @PathParam("handle") String handle) throws BadDataException {
 
         if (!Handle.doesHandleExist(handle.toLowerCase())) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
 
+        JWTSecret jwt = new JWTSecret();
+        int requestId = jwt.getClaim(HTTPRequestUtil.getJWT(auth), "uid").asInt();
+
         try {
             UserService us = UserService.getInstance();
-            int uid = us.getUserId(handle);
-            JsonObject profile = us.getJsonProfile(uid);
+            int userId = us.getUserId(handle);
+            JsonObject profile = us.getJsonProfile(userId);
+
+            RelationshipService rs = RelationshipService.getInstance();
+            JsonObject relationship = rs.getRelationshipJson(requestId, userId);
+            profile.add("relationship", relationship);
+
             return Response.ok().entity(gson.toJson(profile)).build();
         } catch (SQLException e) {
             e.printStackTrace();

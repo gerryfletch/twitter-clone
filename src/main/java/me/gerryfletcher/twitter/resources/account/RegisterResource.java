@@ -1,4 +1,4 @@
-package me.gerryfletcher.twitter.resources.AccountFunctions;
+package me.gerryfletcher.twitter.resources.account;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;

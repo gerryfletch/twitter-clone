@@ -8,9 +8,7 @@ import me.gerryfletcher.twitter.models.DisplayName;
 import me.gerryfletcher.twitter.models.Email;
 import me.gerryfletcher.twitter.models.Handle;
 import me.gerryfletcher.twitter.models.Password;
-import me.gerryfletcher.twitter.utilities.ResourceUtils;
 
-import javax.ws.rs.core.Response;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -22,7 +20,7 @@ public class RegisterService {
 
     private static Connection conn = SQLUtils.connect();
 
-    protected RegisterService() throws SQLException {}
+    RegisterService() throws SQLException {}
 
     public static RegisterService getInstance() {
         if(instance == null) {
@@ -47,8 +45,8 @@ public class RegisterService {
      * @throws SQLException If the DB fails to create a record.
      */
     public String registerUser(String handle, String displayName, String email, String password) throws BadDataException, SQLException, UserExistsException {
-        checkValid(handle, displayName, email, password);
-        isUnique(handle, email);
+        assertValid(handle, displayName, email, password);
+        assertUnique(handle, email);
         password = Password.hashPassword(password);
         int uid = createUser(handle, displayName, email, password);
         return new JWTSecret().generateToken(uid, handle, "user");
@@ -102,7 +100,7 @@ public class RegisterService {
      * @throws SQLException If the DB breaks.
      * @throws UserExistsException  If the user does exist
      */
-    private void isUnique(String handle, String email) throws SQLException, UserExistsException {
+    private void assertUnique(String handle, String email) throws SQLException, UserExistsException {
         try {
             UserService userService = UserService.getInstance();
             if(userService.doesHandleExist(handle)) {
@@ -116,7 +114,7 @@ public class RegisterService {
         }
     }
 
-    private void checkValid(String handle, String displayName, String email, String password) throws BadDataException {
+    private void assertValid(String handle, String displayName, String email, String password) throws BadDataException {
         if (!Handle.isHandleValid(handle))
             throw new BadDataException("Handle is not valid.");
 

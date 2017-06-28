@@ -4,28 +4,21 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-import me.gerryfletcher.twitter.controllers.security.JWTSecret;
-import me.gerryfletcher.twitter.exceptions.UserExistsException;
-import me.gerryfletcher.twitter.models.DisplayName;
-import me.gerryfletcher.twitter.models.Email;
-import me.gerryfletcher.twitter.models.Handle;
-import me.gerryfletcher.twitter.models.Password;
+import me.gerryfletcher.twitter.controllers.sqlite.SQLUtils;
 import me.gerryfletcher.twitter.exceptions.BadDataException;
-import me.gerryfletcher.twitter.exceptions.UserSqlException;
+import me.gerryfletcher.twitter.exceptions.UserExistsException;
 import me.gerryfletcher.twitter.services.RegisterService;
 import me.gerryfletcher.twitter.utilities.ResourceUtils;
-import me.gerryfletcher.twitter.controllers.sqlite.SQLUtils;
 
 import javax.annotation.security.PermitAll;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Path("register")
 public class RegisterResource {
@@ -74,28 +67,5 @@ public class RegisterResource {
             return ResourceUtils.unauthorized("Something went wrong.", Response.Status.INTERNAL_SERVER_ERROR);
         }
     }
-
-    /**
-     * Creates a sucessful response.
-     *
-     * @param handle       The users handle.
-     * @param display_name The users display name.
-     * @param uid          The users unique ID.
-     * @return 200OK Response with JSON holding the JWT.
-     */
-    private Response success(String handle, String display_name, int uid) {
-        JsonObject returnSuccess = new JsonObject();
-
-        JWTSecret jwtSecret = new JWTSecret();
-        String token = jwtSecret.generateToken(uid, "UserResource", "User");
-
-        returnSuccess.addProperty("uid", uid);
-        returnSuccess.addProperty("handle", handle);
-        returnSuccess.addProperty("display_name", display_name);
-        returnSuccess.addProperty("token", token);
-
-        return Response.ok().entity(gson.toJson(returnSuccess)).build();
-    }
-
 
 }

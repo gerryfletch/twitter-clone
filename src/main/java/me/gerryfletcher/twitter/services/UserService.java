@@ -103,6 +103,17 @@ public class UserService {
         return result.getInt(1) == 1;
     }
 
+    private final String does_email_exist_SQL = "SELECT EXISTS(SELECT 1 FROM users WHERE lower(email)=? LIMIT 1)";
+    private final PreparedStatement does_email_exist = conn.prepareStatement(does_email_exist_SQL);
+    public boolean doesEmailExist(String email) throws SQLException {
+        email = email.toLowerCase();
+        does_email_exist.setString(1, email);
+        ResultSet result = does_email_exist.executeQuery();
+        result.next();
+
+        return result.getInt(1) == 1;
+    }
+
     public int getNumberOfFollowing(int uid) throws UserNotExistsException, SQLException {
         get_number_of_following.setInt(1, uid);
         ResultSet num_following = get_number_of_following.executeQuery();
@@ -172,6 +183,4 @@ public class UserService {
 
         return statistics;
     }
-
-
 }

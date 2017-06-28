@@ -1,4 +1,4 @@
-package me.gerryfletcher.twitter.controllers.utils;
+package me.gerryfletcher.twitter.utilities;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;

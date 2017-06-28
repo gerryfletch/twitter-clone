@@ -7,7 +7,8 @@ import com.google.gson.JsonObject;
 import me.gerryfletcher.twitter.controllers.security.JWTSecret;
 import me.gerryfletcher.twitter.controllers.user.Handle;
 import me.gerryfletcher.twitter.controllers.user.Password;
-import me.gerryfletcher.twitter.controllers.utils.ResourceUtils;
+import me.gerryfletcher.twitter.services.UserService;
+import me.gerryfletcher.twitter.utilities.ResourceUtils;
 import me.gerryfletcher.twitter.controllers.sqlite.SQLUtils;
 
 import javax.annotation.security.PermitAll;
@@ -40,7 +41,7 @@ public class LoginResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @PermitAll
-    public Response attemptLogin(String json) {
+    public Response attemptLogin(String json) throws SQLException {
         System.out.println("Login attempted: " + json);
 
         JsonObject userDetails = gson.fromJson(json, JsonObject.class);
@@ -65,7 +66,7 @@ public class LoginResource {
             return ResourceUtils.failed("Handle is not valid.");
         }
 
-        if (!Handle.doesHandleExist(handle)) {
+        if (! UserService.getInstance().doesHandleExist(handle)) {
             return ResourceUtils.failed("Handle does not exist.");
         }
 

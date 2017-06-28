@@ -5,6 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import me.gerryfletcher.twitter.controllers.sqlite.SQLUtils;
+import me.gerryfletcher.twitter.controllers.user.Handle;
 import me.gerryfletcher.twitter.exceptions.UserNotExistsException;
 import me.gerryfletcher.twitter.models.User;
 
@@ -35,7 +36,7 @@ public class UserService {
     private final PreparedStatement get_user_profile = conn.prepareStatement(get_user_profile_SQL);
 
     /* User */
-    private final String get_id_SQL = "SELECT id FROM users WHERE handle = ?";
+    private final String get_id_SQL = "SELECT id FROM users WHERE lower(handle) = ?";
     private final String get_handle_SQL = "SELECT handle FROM users WHERE id = ?";
     private final String get_display_name_SQL = "SELECT display_name FROM users WHERE id = ?";
 
@@ -67,6 +68,7 @@ public class UserService {
     }
 
     public int getUserId(String handle) throws SQLException {
+        handle = handle.toLowerCase();
         get_id.setString(1, handle);
         ResultSet result = get_id.executeQuery();
         if (result.next()) {
@@ -81,6 +83,30 @@ public class UserService {
             return result.getString("handle");
         }
         throw new UserNotExistsException("User " + uid + " does not exist.");
+    }
+
+    private final String does_id_exist_SQL = "SELECT EXISTS(SELECT 1 FROM users WHERE id=? LIMIT 1)";
+    private final PreparedStatement does_id_exist = conn.prepareStatement(does_id_exist_SQL);
+    public boolean doesIdExist(int uid) throws SQLException {
+        does_id_exist.setInt(1, uid);
+        ResultSet result = does_id_exist.executeQuery();
+        result.next();
+
+        return result.getInt(1) == 1;
+    }
+
+    private final String does_handle_exist_SQL = "SELECT EXISTS(SELECT 1 FROM users WHERE lower(handle)=? LIMIT 1)";
+    private final PreparedStatement does_handle_exist = conn.prepareStatement(does_handle_exist_SQL);
+    public boolean doesHandleExist(String handle) throws SQLException {
+        handle = handle.toLowerCase();
+        if(! Handle.isHandleValid(handle))
+            return false;
+
+        does_handle_exist.setString(1, handle);
+        ResultSet result = does_handle_exist.executeQuery();
+        result.next();
+
+        return result.getInt(1) == 1;
     }
 
     public int getNumberOfFollowing(int uid) throws SQLException {
@@ -115,9 +141,12 @@ public class UserService {
         return gson.fromJson(getJsonProfile(uid), User.class);
     }
 
-    /*
-        Proof of concept
-    */
+    /**
+     * Returns a JSON representation of a users profile.
+     * @param uid   The users ID
+     * @return  JsonObject
+     * @throws SQLException extends UserNotExistsException, will report back if the user does not exist.
+     */
     public JsonObject getJsonProfile(int uid) throws SQLException {
 
         JsonObject profile = new JsonObject();

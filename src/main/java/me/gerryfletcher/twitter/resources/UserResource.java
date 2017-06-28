@@ -4,12 +4,10 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-import me.gerryfletcher.twitter.controllers.relationships.RelationshipType;
 import me.gerryfletcher.twitter.controllers.security.HTTPRequestUtil;
 import me.gerryfletcher.twitter.controllers.security.JWTSecret;
 import me.gerryfletcher.twitter.controllers.user.Handle;
-import me.gerryfletcher.twitter.models.User;
-import me.gerryfletcher.twitter.controllers.utils.ResourceUtils;
+import me.gerryfletcher.twitter.utilities.ResourceUtils;
 import me.gerryfletcher.twitter.exceptions.BadDataException;
 import me.gerryfletcher.twitter.services.RelationshipService;
 import me.gerryfletcher.twitter.services.UserService;
@@ -49,9 +47,9 @@ public class UserResource {
     @Path("{handle}")
     @RolesAllowed("User")
     @GET
-    public Response getUserProfile(@HeaderParam("authorization") String auth, @PathParam("handle") String handle) throws BadDataException {
+    public Response getUserProfile(@HeaderParam("authorization") String auth, @PathParam("handle") String handle) throws BadDataException, SQLException {
 
-        if (!Handle.doesHandleExist(handle.toLowerCase())) {
+        if (! UserService.getInstance().doesHandleExist(handle)) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
 

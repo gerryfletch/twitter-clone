@@ -4,7 +4,6 @@ import com.google.gson.JsonObject;
 import me.gerryfletcher.twitter.controllers.relationships.RelationshipType;
 import me.gerryfletcher.twitter.controllers.sqlite.SQLUtils;
 
-import javax.management.relation.Relation;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -24,6 +23,9 @@ public class RelationshipService {
             "WHERE (follower_id = ? AND following_id = ?)";
     private final PreparedStatement get_relationship = conn.prepareStatement(get_relationship_SQL);
 
+    private final String create_following_SQL = "";
+    private final PreparedStatement create_following = conn.prepareStatement(create_following_SQL);
+
 
     public static RelationshipService getInstance() throws SQLException {
         if (instance == null) {
@@ -34,9 +36,10 @@ public class RelationshipService {
 
     /**
      * GetRelationship tells you the type of relationship between users, from the <b>first users point of view.</b>
-     * @param follower_id The user whos persective it is from
+     *
+     * @param follower_id  The user whos persective it is from
      * @param following_id The user we are comparing the relationship with
-     * @return  The relationshipType enum
+     * @return The relationshipType enum
      * @throws SQLException
      */
     public RelationshipType getRelationship(int follower_id, int following_id) throws SQLException {
@@ -48,7 +51,7 @@ public class RelationshipService {
 
         ResultSet result = get_relationship.executeQuery();
 
-        if(! result.next()) {
+        if (!result.next()) {
             return status;
         } else {
             status = RelationshipType.FOLLOWING;
@@ -60,7 +63,7 @@ public class RelationshipService {
 
         ResultSet resultTwo = get_relationship.executeQuery();
 
-        if(resultTwo.next()) {
+        if (resultTwo.next()) {
             status = RelationshipType.MUTUALS;
         }
 
@@ -79,5 +82,22 @@ public class RelationshipService {
         response.addProperty("mutuals", mutuals);
 
         return response;
+    }
+
+    /**
+     * Makes user 1 follow user 2.
+     *
+     * @param uid      User 1 ID.
+     * @param followId Receiving user 2 ID.
+     * @return True if successful, false if they are already following.
+     */
+    public boolean setFollowing(int uid, int followId) {
+        try {
+            UserService userService = UserService.getInstance();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 }

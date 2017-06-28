@@ -9,7 +9,7 @@ import me.gerryfletcher.twitter.controllers.user.Handle;
 import me.gerryfletcher.twitter.controllers.user.Password;
 import me.gerryfletcher.twitter.exceptions.BadDataException;
 import me.gerryfletcher.twitter.exceptions.UserSqlException;
-import me.gerryfletcher.twitter.controllers.utils.ResourceUtils;
+import me.gerryfletcher.twitter.utilities.ResourceUtils;
 import me.gerryfletcher.twitter.controllers.sqlite.SQLUtils;
 
 import javax.annotation.security.PermitAll;

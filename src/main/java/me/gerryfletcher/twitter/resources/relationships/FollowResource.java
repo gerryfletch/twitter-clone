@@ -1,15 +1,15 @@
 package me.gerryfletcher.twitter.resources.relationships;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import me.gerryfletcher.twitter.controllers.relationships.RelationshipType;
 import me.gerryfletcher.twitter.controllers.security.HTTPRequestUtil;
 import me.gerryfletcher.twitter.controllers.security.JWTSecret;
-import me.gerryfletcher.twitter.controllers.user.Handle;
+import me.gerryfletcher.twitter.exceptions.UserNotExistsException;
+import me.gerryfletcher.twitter.models.Handle;
 import me.gerryfletcher.twitter.exceptions.BadDataException;
 import me.gerryfletcher.twitter.services.RelationshipService;
+import me.gerryfletcher.twitter.services.UserService;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -29,7 +29,15 @@ public class FollowResource {
 
         JsonObject request = gson.fromJson(requestJson, JsonObject.class);
         String followHandle = request.get("handle").getAsString();
-        int followId = Handle.getUserId(followHandle); //todo: change to UserService
+        int followId;
+        try {
+            followId = UserService.getInstance().getUserId(followHandle);
+        } catch (UserNotExistsException e) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
 
         String token;
         try {

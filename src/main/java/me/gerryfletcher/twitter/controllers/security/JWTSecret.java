@@ -66,13 +66,14 @@ public class JWTSecret implements SecretKey{
      * @param role   User/Admin etc
      * @return       The token
      */
-    public String generateToken(int userId, String role) {
+    public String generateToken(int userId, String handle, String role) {
         try {
             long now = System.currentTimeMillis();
             Algorithm algorithm = Algorithm.HMAC256(key);
             return JWT.create()
                     .withIssuer("auth0")
                     .withClaim("uid", userId) //ID from DB
+                    .withClaim("handle", handle)
                     .withClaim("role", role) //role from DB  (alt: permission int? )
                     .withExpiresAt(new Date( now + TimeUnit.HOURS.toMillis(2)))
                     .sign(algorithm);
@@ -99,22 +100,6 @@ public class JWTSecret implements SecretKey{
         try {
             DecodedJWT jwt = JWT.decode(token);
             return jwt.getClaim(claim);
-        } catch (JWTDecodeException e) {
-            System.out.println("Invalid token.");
-            return null;
-        }
-    }
-
-    /**
-     * Helper method to return a single <b>String </b>claim. Examples: uid, role, handle, date
-     * @param token JWT
-     * @param claim Claim (key) to look for - Case Sensitive
-     * @return      The claims value
-     */
-    public String getStringClaim(String token, String claim) {
-        try {
-            DecodedJWT jwt = JWT.decode(token);
-            return jwt.getClaim(claim).asString();
         } catch (JWTDecodeException e) {
             System.out.println("Invalid token.");
             return null;

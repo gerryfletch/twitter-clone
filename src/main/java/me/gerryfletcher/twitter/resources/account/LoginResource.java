@@ -4,12 +4,10 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-import me.gerryfletcher.twitter.controllers.security.JWTSecret;
-import me.gerryfletcher.twitter.controllers.user.Handle;
-import me.gerryfletcher.twitter.controllers.user.Password;
-import me.gerryfletcher.twitter.services.UserService;
+import me.gerryfletcher.twitter.exceptions.BadDataException;
+import me.gerryfletcher.twitter.exceptions.UserNotExistsException;
+import me.gerryfletcher.twitter.services.LoginService;
 import me.gerryfletcher.twitter.utilities.ResourceUtils;
-import me.gerryfletcher.twitter.controllers.sqlite.SQLUtils;
 
 import javax.annotation.security.PermitAll;
 import javax.ws.rs.Consumes;
@@ -55,73 +53,27 @@ public class LoginResource {
          */
 
         if (handle.isEmpty() || password.isEmpty()) {
-            return ResourceUtils.failed("Handle or Password is empty.");
+            return ResourceUtils.unauthorized("Handle or Password is empty.");
         }
 
-        if (!Password.isPasswordValid(password)) {
-            return ResourceUtils.failed("Password is not valid.");
-        }
+        LoginService loginService = LoginService.getInstance();
 
-        if (!Handle.isHandleValid(handle)) {
-            return ResourceUtils.failed("Handle is not valid.");
-        }
-
-        if (! UserService.getInstance().doesHandleExist(handle)) {
-            return ResourceUtils.failed("Handle does not exist.");
-        }
-
-        if (!isLoginValid(handle, password)) {
-            return ResourceUtils.failed("Incorrect password.");
-        }
-
-        int userId = Handle.getUserId(handle);
-        String role = Handle.getUserRole(handle);
-
-        /*
-            Generate the JSON Web Token with ID and Role in the payload
-         */
-        String token = new JWTSecret().generateToken(userId, role);
-
-        if (token == null) {
-            return ResourceUtils.failed("Unkown error.");
+        String token;
+        try {
+            token = loginService.loginUser(handle, password);
+        } catch (BadDataException | UserNotExistsException e) {
+            return ResourceUtils.unauthorized(e.getMessage());
+        } catch (SQLException ev) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
 
         JsonObject returnSuccess = new JsonObject();
         returnSuccess.addProperty("authenticated", true);
-        returnSuccess.addProperty("handle", handle);
-        returnSuccess.addProperty("uid", userId);
         returnSuccess.addProperty("token", token);
 
-        System.out.println("[" + role + "] " + handle + " just logged in.");
+        System.out.println(handle + " just logged in.");
 
-        return Response.status(200).entity(gson.toJson(returnSuccess)).build();
-    }
-
-    /**
-     * Checks the plaintext password against the hashed password in the DB.
-     * @param handle    The users handle.
-     * @param password  The users plaintext password.
-     * @return          True/False on matching passwords.
-     */
-    private boolean isLoginValid(String handle, String password) {
-        String query = "SELECT password FROM users WHERE handle= ?";
-        try (Connection conn = SQLUtils.connect();
-             PreparedStatement st = conn.prepareStatement(query)) {
-            st.setString(1, handle);
-            st.execute();
-            ResultSet resultSet = st.getResultSet();
-
-            String resultPassword = resultSet.getString("password");
-
-            if (!Password.checkPassword(password, resultPassword)) {
-                return false;
-            }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-            return false;
-        }
-
-        return true;
+        return Response.ok().entity(gson.toJson(returnSuccess)).build();
     }
 
 }

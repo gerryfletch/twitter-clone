@@ -1,4 +1,4 @@
-package me.gerryfletcher.twitter.controllers.user;
+package me.gerryfletcher.twitter.models;
 
 
 import org.springframework.security.crypto.bcrypt.BCrypt;

@@ -6,7 +6,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import me.gerryfletcher.twitter.controllers.security.HTTPRequestUtil;
 import me.gerryfletcher.twitter.controllers.security.JWTSecret;
-import me.gerryfletcher.twitter.controllers.user.Handle;
+import me.gerryfletcher.twitter.exceptions.UserNotExistsException;
+import me.gerryfletcher.twitter.models.Handle;
 import me.gerryfletcher.twitter.utilities.ResourceUtils;
 import me.gerryfletcher.twitter.exceptions.BadDataException;
 import me.gerryfletcher.twitter.services.RelationshipService;
@@ -47,15 +48,23 @@ public class UserResource {
     @Path("{handle}")
     @RolesAllowed("User")
     @GET
-    public Response getUserProfile(@HeaderParam("authorization") String auth, @PathParam("handle") String handle) throws BadDataException, SQLException {
+    public Response getUserProfile(@HeaderParam("authorization") String auth, @PathParam("handle") String handle) {
 
-        if (! UserService.getInstance().doesHandleExist(handle)) {
-            return Response.status(Response.Status.NOT_FOUND).build();
+        try {
+            if (!UserService.getInstance().doesHandleExist(handle)) {
+                return Response.status(Response.Status.NOT_FOUND).build();
+            }
+        } catch (SQLException e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
 
         JWTSecret jwt = new JWTSecret();
-        int requestId = jwt.getClaim(HTTPRequestUtil.getJWT(auth), "uid").asInt();
-
+        int requestId;
+        try {
+            requestId = jwt.getClaim(HTTPRequestUtil.getJWT(auth), "uid").asInt();
+        } catch (BadDataException e) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
         try {
             UserService us = UserService.getInstance();
             int userId = us.getUserId(handle);
@@ -66,9 +75,11 @@ public class UserResource {
             profile.add("relationship", relationship);
 
             return Response.ok().entity(gson.toJson(profile)).build();
-        } catch (SQLException e) {
+        } catch (UserNotExistsException e) {
             e.printStackTrace();
-            return ResourceUtils.failed(e.getMessage(), 403); // Return forbidden
+            return ResourceUtils.unauthorized(e.getMessage(), Response.Status.FORBIDDEN);
+        } catch (SQLException ev) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -83,12 +94,16 @@ public class UserResource {
     @RolesAllowed("User")
     @GET
     public Response verifyUser(@HeaderParam("authorization") String auth, @PathParam("handle") String handle) {
+
         try {
+
+            UserService userService = UserService.getInstance();
+
             String token = HTTPRequestUtil.getJWT(auth); // JWT
             JWTSecret jwtSecret = new JWTSecret();
 
             int headerUID = jwtSecret.getClaim(token, "uid").asInt(); // User ID
-            String headerHandle = Handle.getUserHandle(headerUID);
+            String headerHandle = userService.getHandle(headerUID);
 
             if (!headerHandle.equals(handle)) {
                 JsonObject response = new JsonObject();
@@ -101,9 +116,12 @@ public class UserResource {
                 return Response.ok().build();
             }
 
-        } catch (BadDataException e) {
+        } catch (BadDataException | UserNotExistsException e) {
             e.printStackTrace();
             return Response.status(Response.Status.BAD_REQUEST).build();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

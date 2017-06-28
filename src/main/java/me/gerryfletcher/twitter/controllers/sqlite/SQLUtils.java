@@ -1,12 +1,9 @@
 package me.gerryfletcher.twitter.controllers.sqlite;
 
-import me.gerryfletcher.twitter.controllers.user.Password;
+import me.gerryfletcher.twitter.models.Password;
 
 import java.sql.*;
 
-/**
- * Created by Gerry on 09/06/2017.
- */
 public class SQLUtils {
 
     public static Connection connect() {

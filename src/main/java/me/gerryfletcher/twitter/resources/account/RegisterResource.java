@@ -5,8 +5,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import me.gerryfletcher.twitter.controllers.security.JWTSecret;
-import me.gerryfletcher.twitter.controllers.user.Handle;
-import me.gerryfletcher.twitter.controllers.user.Password;
+import me.gerryfletcher.twitter.models.Handle;
+import me.gerryfletcher.twitter.models.Password;
 import me.gerryfletcher.twitter.exceptions.BadDataException;
 import me.gerryfletcher.twitter.exceptions.UserSqlException;
 import me.gerryfletcher.twitter.utilities.ResourceUtils;
@@ -38,7 +38,7 @@ public class RegisterResource {
     /**
      * Attempts to create a user.
      * @param json  JSON containing handle, display name, email and password.
-     * @return 200 OK with JWT, or 403 Forbidden if failed.
+     * @return 200 OK with JWT, or 403 Forbidden if unauthorized.
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -59,20 +59,20 @@ public class RegisterResource {
             email = processEmail(request.getAsJsonPrimitive("email").getAsString());
             password = processPassword(request.getAsJsonPrimitive("password").getAsString());
         } catch (BadDataException e) {
-            return ResourceUtils.failed(e.getMessage(), 400);
+            return ResourceUtils.unauthorized(e.getMessage(), Response.Status.BAD_REQUEST);
         }
 
         // Check that the handle and email are not in use
         try {
             veriyUnique(handle, email);
         } catch (UserSqlException e) {
-            return ResourceUtils.failed("Handle or Email in use.", 403);
+            return ResourceUtils.unauthorized("Handle or Email in use.", Response.Status.NOT_FOUND);
         }
 
         try {
             uid = createUser(handle, display_name, email, password);
         } catch (UserSqlException e) {
-            return ResourceUtils.failed("Problem creating user.", 403);
+            return ResourceUtils.unauthorized("Problem creating user.", Response.Status.NOT_FOUND);
         }
 
         return success(handle, display_name, uid);
@@ -89,7 +89,7 @@ public class RegisterResource {
         JsonObject returnSuccess = new JsonObject();
 
         JWTSecret jwtSecret = new JWTSecret();
-        String token = jwtSecret.generateToken(uid, "UserResource");
+        String token = jwtSecret.generateToken(uid, "UserResource", "User");
 
         returnSuccess.addProperty("uid", uid);
         returnSuccess.addProperty("handle", handle);

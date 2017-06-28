@@ -21,11 +21,11 @@ public class ResourceUtils {
      * @param error A user-friendly error.
      * @return 401 Unauthorized response with JSON error in body.
      **/
-    public static Response failed(String error) {
+    public static Response unauthorized(String error) {
         System.out.println("ERROR: " + error);
         JsonObject returnFail = new JsonObject();
         returnFail.addProperty("error", error);
-        return Response.status(401).entity(gson.toJson(returnFail)).build();
+        return Response.status(Response.Status.UNAUTHORIZED).entity(gson.toJson(returnFail)).build();
     }
 
     /**
@@ -35,7 +35,7 @@ public class ResourceUtils {
      * @param status A HTTP status code.
      * @return  The Response object with a JSON error in the body.
      */
-    public static Response failed(String error, int status) {
+    public static Response unauthorized(String error, Response.StatusType status) {
         System.out.println("ERROR: " + error);
         JsonObject returnFail = new JsonObject();
         returnFail.addProperty("error", error);

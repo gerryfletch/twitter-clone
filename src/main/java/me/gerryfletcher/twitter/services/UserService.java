@@ -1,11 +1,9 @@
 package me.gerryfletcher.twitter.services;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import me.gerryfletcher.twitter.controllers.sqlite.SQLUtils;
-import me.gerryfletcher.twitter.controllers.user.Handle;
+import me.gerryfletcher.twitter.models.Handle;
 import me.gerryfletcher.twitter.exceptions.UserNotExistsException;
 import me.gerryfletcher.twitter.models.User;
 
@@ -14,15 +12,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-/**
- * Created by Gerry on 27/06/2017.
- */
 public class UserService {
 
     private static UserService instance = null;
 
-    protected UserService() throws SQLException {
-    }
+    protected UserService() throws SQLException { }
 
     private Connection conn = SQLUtils.connect();
 
@@ -67,7 +61,7 @@ public class UserService {
         return instance;
     }
 
-    public int getUserId(String handle) throws SQLException {
+    public int getUserId(String handle) throws UserNotExistsException, SQLException {
         handle = handle.toLowerCase();
         get_id.setString(1, handle);
         ResultSet result = get_id.executeQuery();
@@ -77,7 +71,7 @@ public class UserService {
         throw new UserNotExistsException("User " + handle + " does not exist.");
     }
 
-    public String getHandle(int uid) throws SQLException {
+    public String getHandle(int uid) throws UserNotExistsException, SQLException {
         ResultSet result = get_handle.executeQuery();
         if (result.next()) {
             return result.getString("handle");
@@ -109,7 +103,7 @@ public class UserService {
         return result.getInt(1) == 1;
     }
 
-    public int getNumberOfFollowing(int uid) throws SQLException {
+    public int getNumberOfFollowing(int uid) throws UserNotExistsException, SQLException {
         get_number_of_following.setInt(1, uid);
         ResultSet num_following = get_number_of_following.executeQuery();
         if (num_following.next()) {
@@ -118,7 +112,7 @@ public class UserService {
         throw new UserNotExistsException("User " + uid + " does not exist");
     }
 
-    public int getNumberOfFollowers(int uid) throws SQLException {
+    public int getNumberOfFollowers(int uid) throws UserNotExistsException, SQLException {
         get_number_of_followers.setInt(1, uid);
         ResultSet num_followers = get_number_of_followers.executeQuery();
         if (num_followers.next()) {
@@ -127,7 +121,7 @@ public class UserService {
         throw new UserNotExistsException("User " + uid + " does not exist.");
     }
 
-    public int getNumberOfTweets(int uid) throws SQLException {
+    public int getNumberOfTweets(int uid) throws UserNotExistsException, SQLException {
         get_number_of_tweets.setInt(1, uid);
         ResultSet num_tweets = get_number_of_tweets.executeQuery();
         if (num_tweets.next()) {
@@ -136,7 +130,7 @@ public class UserService {
         throw new UserNotExistsException("User " + uid + " does not exist.");
     }
 
-    public User getUser(int uid) throws SQLException {
+    public User getUser(int uid) throws UserNotExistsException, SQLException {
         Gson gson = new Gson();
         return gson.fromJson(getJsonProfile(uid), User.class);
     }
@@ -147,7 +141,7 @@ public class UserService {
      * @return  JsonObject
      * @throws SQLException extends UserNotExistsException, will report back if the user does not exist.
      */
-    public JsonObject getJsonProfile(int uid) throws SQLException {
+    public JsonObject getJsonProfile(int uid) throws UserNotExistsException, SQLException {
 
         JsonObject profile = new JsonObject();
 
@@ -170,7 +164,7 @@ public class UserService {
 
     }
 
-    private JsonObject getProfileStatistics(int uid) throws SQLException {
+    private JsonObject getProfileStatistics(int uid) throws UserNotExistsException, SQLException {
         JsonObject statistics = new JsonObject();
         statistics.addProperty("number_of_tweets", getNumberOfTweets(uid));
         statistics.addProperty("number_of_followers", getNumberOfFollowers(uid));

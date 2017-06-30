@@ -1,5 +1,6 @@
 package me.gerryfletcher.twitter.resources.relationships;
 
+import me.gerryfletcher.twitter.exceptions.ApplicationException;
 import me.gerryfletcher.twitter.services.RelationshipService;
 import me.gerryfletcher.twitter.services.UserService;
 
@@ -19,13 +20,7 @@ public class RelationshipResource {
     @Path("{handle}/{handleTwo}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getRelationship(@PathParam("handle") String handle, @PathParam("handleTwo") String handleTwo) {
-        try {
-            RelationshipService relationshipService = RelationshipService.getInstance();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return Response.status(Response.Status.BAD_REQUEST).build();
-        }
-
+        RelationshipService relationshipService = RelationshipService.getInstance();
         return Response.ok().build();
     }
 

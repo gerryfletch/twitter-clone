@@ -63,7 +63,7 @@ public class FollowResource {
                 return Response.status(Response.Status.BAD_REQUEST).build(); // Already following
             }
 
-        } catch (SQLException e) {
+        } catch (ApplicationException e) {
             e.printStackTrace();
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }

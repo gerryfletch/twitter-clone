@@ -1,34 +1,23 @@
 package me.gerryfletcher.twitter.services;
 
 import com.google.gson.JsonObject;
+import me.gerryfletcher.twitter.DAO.RelationshipDao;
 import me.gerryfletcher.twitter.controllers.relationships.RelationshipType;
-import me.gerryfletcher.twitter.controllers.sqlite.SQLUtils;
 import me.gerryfletcher.twitter.exceptions.ApplicationException;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class RelationshipService {
 
     private static RelationshipService instance = null;
+    private RelationshipDao relationshipDao;
 
-    protected RelationshipService() throws SQLException {
+    private RelationshipService() {
+        this.relationshipDao = new RelationshipDao();
     }
 
-    private Connection conn = SQLUtils.connect();
 
-    private final String get_relationship_SQL = "SELECT *" +
-            "FROM followers " +
-            "WHERE (follower_id = ? AND following_id = ?)";
-    private final PreparedStatement get_relationship = conn.prepareStatement(get_relationship_SQL);
-
-    private final String create_following_SQL = "";
-    private final PreparedStatement create_following = conn.prepareStatement(create_following_SQL);
-
-
-    public static RelationshipService getInstance() throws SQLException {
+    public static RelationshipService getInstance() {
         if (instance == null) {
             instance = new RelationshipService();
         }
@@ -38,41 +27,33 @@ public class RelationshipService {
     /**
      * GetRelationship tells you the type of relationship between users, from the <b>first users point of view.</b>
      *
-     * @param follower_id  The user whos persective it is from
-     * @param following_id The user we are comparing the relationship with
-     * @return The relationshipType enum
-     * @throws SQLException
+     * @param follower_id  The user whos persective it is from.
+     * @param following_id The user we are comparing the relationship with.
+     * @return The relationshipType enum.
+     * @throws ApplicationException In DB failiure.
      */
-    public RelationshipType getRelationship(int follower_id, int following_id) throws SQLException {
-
-        RelationshipType status = RelationshipType.NO_RELATIONSHIP;
-
-        get_relationship.setInt(1, follower_id);
-        get_relationship.setInt(2, following_id);
-
-        ResultSet result = get_relationship.executeQuery();
-
-        if (!result.next()) {
-            return status;
-        } else {
-            status = RelationshipType.FOLLOWING;
+    public RelationshipType getRelationship(int follower_id, int following_id) throws ApplicationException {
+        try {
+            return relationshipDao.getRelationship(follower_id, following_id);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new ApplicationException("Problem getting Relationship from DAO", e);
         }
-
-        // Check if the relationship is reversed
-        get_relationship.setInt(1, following_id);
-        get_relationship.setInt(2, follower_id);
-
-        ResultSet resultTwo = get_relationship.executeQuery();
-
-        if (resultTwo.next()) {
-            status = RelationshipType.MUTUALS;
-        }
-
-        return status;
-
     }
 
-    public JsonObject getRelationshipJson(int follower_id, int following_id) throws SQLException {
+    /**
+     * Returns a JSON representation of a relationship.
+     *  Example: User 1 follows User 2, but User 2 does <b>not</b> follow User 1.
+     *  {
+     *      "following": true,
+     *      "mutuals": false
+     *  }
+     * @param follower_id   The user whos perspective it is from.
+     * @param following_id  The user we are comparing the relationship with.
+     * @return  A JSON representation of a relationship.
+     * @throws ApplicationException In DB failiure.
+     */
+    public JsonObject getRelationshipJson(int follower_id, int following_id) throws ApplicationException {
         RelationshipType relationship = getRelationship(follower_id, following_id);
 
         boolean following = (relationship == RelationshipType.FOLLOWING || relationship == RelationshipType.MUTUALS);

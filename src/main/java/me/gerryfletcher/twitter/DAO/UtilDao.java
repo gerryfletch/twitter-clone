@@ -1,6 +1,7 @@
 package me.gerryfletcher.twitter.DAO;
 
 import com.zaxxer.hikari.HikariDataSource;
+import me.gerryfletcher.twitter.controllers.sqlite.DBHandler;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,8 +16,8 @@ public abstract class UtilDao {
 
     private HikariDataSource dataSource;
 
-    UtilDao(HikariDataSource dataSource) {
-        this.dataSource = dataSource;
+    UtilDao() {
+        this.dataSource = DBHandler.getDataSource();
     }
 
     protected Connection getConnection() throws SQLException {

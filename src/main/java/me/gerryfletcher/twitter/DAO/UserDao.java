@@ -11,9 +11,7 @@ import java.sql.SQLException;
 
 public class UserDao extends UtilDao {
 
-    public UserDao(HikariDataSource dataSource) {
-        super(dataSource);
-    }
+    public UserDao() {}
 
     private final String GET_HANDLE_QUERY = "SELECT handle FROM users WHERE id=?";
 

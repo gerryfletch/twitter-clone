@@ -15,8 +15,8 @@ public class UserService {
     private static UserService instance = null;
     private UserDao userDao;
 
-    protected UserService() {
-        this.userDao = new UserDao(DBHandler.getDataSource());
+    private UserService() {
+        this.userDao = new UserDao();
     }
 
     public static UserService getInstance() {
@@ -106,7 +106,7 @@ public class UserService {
         }
     }
 
-    public boolean doesEmailExist(String email) throws ApplicationException {
+    boolean doesEmailExist(String email) throws ApplicationException {
         try {
             return userDao.doesEmailExist(email);
         } catch (SQLException e) {

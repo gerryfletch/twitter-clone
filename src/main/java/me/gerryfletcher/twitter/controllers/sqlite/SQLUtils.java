@@ -1,7 +1,9 @@
 package me.gerryfletcher.twitter.controllers.sqlite;
 
+import com.zaxxer.hikari.HikariDataSource;
 import me.gerryfletcher.twitter.models.Password;
 
+import javax.sql.DataSource;
 import java.sql.*;
 
 public class SQLUtils {
@@ -79,11 +81,11 @@ public class SQLUtils {
 
     public static void selectAllFromUsers() {
         String sql = "SELECT * FROM users";
-        try (Connection conn = SQLUtils.connect();
-             Statement st = conn.createStatement()){
-
-            ResultSet rs = st.executeQuery(sql);
-
+        HikariDataSource dataSource = DBHandler.getDataSource();
+        try(Connection conn = dataSource.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql))
+        {
+            ResultSet rs = stmt.executeQuery();
             while(rs.next()) {
                 System.out.println(rs.getInt("id") + "  |  "
                         + rs.getString("handle")
@@ -97,7 +99,8 @@ public class SQLUtils {
                         + rs.getString("role"));
             }
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
         }
+
     }
 }

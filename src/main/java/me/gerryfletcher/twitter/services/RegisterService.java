@@ -78,17 +78,20 @@ public class RegisterService {
             register_user.setString(2, displayName);
             register_user.setString(3, email);
             register_user.setString(4, password);
-
+            System.out.println("step 2");
             register_user.executeUpdate();
-
+            System.out.println("step 3");
             ResultSet generatedKeys = register_user.getGeneratedKeys();
+            System.out.println("step 4");
             if(generatedKeys.next()) {
+                System.out.println("step 5");
                 return generatedKeys.getInt(1);
             } else {
                 throw new SQLException("Something went wrong. Unable to process user ID.");
             }
 
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new SQLException("Something went wrong.");
         }
     }
@@ -104,13 +107,13 @@ public class RegisterService {
         try {
             UserService userService = UserService.getInstance();
             if(userService.doesHandleExist(handle)) {
-                throw new UserExistsException("This username already exists.");
+                throw new UserExistsException("This handle already exists.");
             }
             if(userService.doesEmailExist(email)) {
                 throw new UserExistsException("This email already exists.");
             }
         } catch (SQLException e) {
-            throw new SQLException("Something went wrong.");
+            throw new SQLException("Something went wrong");
         }
     }
 

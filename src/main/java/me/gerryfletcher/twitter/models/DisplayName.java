@@ -8,7 +8,7 @@ import me.gerryfletcher.twitter.exceptions.BadDataException;
 public class DisplayName {
 
     public static boolean isDisplayNameValid(String displayName) {
-        return (displayName.length() < 3 || displayName.length() > 15);
+        return !(displayName.length() < 3 || displayName.length() > 15);
     }
 
 }

@@ -7,6 +7,7 @@ import com.google.gson.JsonObject;
 import me.gerryfletcher.twitter.controllers.sqlite.SQLUtils;
 import me.gerryfletcher.twitter.exceptions.BadDataException;
 import me.gerryfletcher.twitter.exceptions.UserExistsException;
+import me.gerryfletcher.twitter.models.Email;
 import me.gerryfletcher.twitter.services.RegisterService;
 import me.gerryfletcher.twitter.utilities.ResourceUtils;
 
@@ -43,12 +44,15 @@ public class RegisterResource {
     @Produces(MediaType.APPLICATION_JSON)
     @PermitAll
     public Response registerUser(String json) {
+        System.out.println(json);
         JsonObject request = gson.fromJson(json, JsonObject.class);
 
         String handle = request.get("handle").getAsString();
         String displayName = request.get("display_name").getAsString();
         String email = request.get("email").getAsString();
         String password = request.get("password").getAsString();
+
+        System.out.println(Email.isEmailValid(email));
 
         RegisterService registerService = RegisterService.getInstance();
 

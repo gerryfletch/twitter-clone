@@ -7,6 +7,11 @@ import java.sql.SQLException;
  * doesn't return a user.
  */
 public class UserNotExistsException extends Exception {
+
+    public UserNotExistsException() {
+        super("User does not exist.");
+    }
+
     public UserNotExistsException(String message) {
         super(message);
     }

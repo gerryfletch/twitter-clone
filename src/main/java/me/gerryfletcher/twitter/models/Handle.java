@@ -11,12 +11,9 @@ public class Handle {
     */
     private static final String USERNAME_PATTERN = "^[a-zA-Z0-9_-]{3,15}$";
 
-    private static Pattern pattern;
-    private static Matcher matcher;
-
     public static boolean isHandleValid(String username) {
-        pattern = Pattern.compile(USERNAME_PATTERN);
-        matcher = pattern.matcher(username);
+        Pattern pattern = Pattern.compile(USERNAME_PATTERN);
+        Matcher matcher = pattern.matcher(username);
 
         return matcher.matches();
     }

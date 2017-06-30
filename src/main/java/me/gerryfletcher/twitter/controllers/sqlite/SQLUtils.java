@@ -26,7 +26,7 @@ public class SQLUtils {
         //String deleteTable = "DROP TABLE [IF EXISTS] " + tableName + ";";
 
         // SQL Statement to create users table
-        String createTable = "CREATE TABLE IF NOT EXISTS " + tableName +" (\n"
+        String createTable = "CREATE TABLE IF NOT EXISTS " + tableName + " (\n"
                 + " id integer PRIMARY KEY AUTOINCREMENT,\n"
                 + " handle varchar NOT NULL,\n"
                 + " display_name varchar NOT NULL,\n"
@@ -54,7 +54,7 @@ public class SQLUtils {
 
         try (Connection conn = connect();
              PreparedStatement st = conn.prepareStatement(sql)) {
-            for(int i = 0; i < 10; i++) {
+            for (int i = 0; i < 10; i++) {
                 String role = "User";
                 String handle = names[i].toLowerCase();
                 String display_name = "_" + names[i];
@@ -63,7 +63,7 @@ public class SQLUtils {
                 String password = "Passw0rd" + id;
                 String hashedPassword = Password.hashPassword(password);
 
-                if(i == 3) {
+                if (i == 3) {
                     role = "Admin";
                 }
 
@@ -82,11 +82,10 @@ public class SQLUtils {
     public static void selectAllFromUsers() {
         String sql = "SELECT * FROM users";
         HikariDataSource dataSource = DBHandler.getDataSource();
-        try(Connection conn = dataSource.getConnection();
-            PreparedStatement stmt = conn.prepareStatement(sql))
-        {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
-            while(rs.next()) {
+            while (rs.next()) {
                 System.out.println(rs.getInt("id") + "  |  "
                         + rs.getString("handle")
                         + "  |  "

@@ -4,10 +4,13 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-import me.gerryfletcher.twitter.controllers.sqlite.SQLUtils;
+import me.gerryfletcher.twitter.exceptions.ApplicationException;
 import me.gerryfletcher.twitter.exceptions.BadDataException;
 import me.gerryfletcher.twitter.exceptions.UserExistsException;
+import me.gerryfletcher.twitter.models.DisplayName;
 import me.gerryfletcher.twitter.models.Email;
+import me.gerryfletcher.twitter.models.Handle;
+import me.gerryfletcher.twitter.models.Password;
 import me.gerryfletcher.twitter.services.RegisterService;
 import me.gerryfletcher.twitter.utilities.ResourceUtils;
 
@@ -18,8 +21,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.sql.Connection;
-import java.sql.SQLException;
 
 @Path("register")
 public class RegisterResource {
@@ -29,9 +30,6 @@ public class RegisterResource {
             .serializeNulls()
             .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
             .create();
-
-
-    private Connection conn = SQLUtils.connect();
 
     /**
      * Attempts to create a user.
@@ -52,11 +50,25 @@ public class RegisterResource {
         String email = request.get("email").getAsString();
         String password = request.get("password").getAsString();
 
-        System.out.println(Email.isEmailValid(email));
+        if (!Handle.isHandleValid(handle)) {
+            return ResourceUtils.unauthorized("Handle is not valid.", Response.Status.BAD_REQUEST);
+        }
+
+        if (!DisplayName.isDisplayNameValid(displayName)) {
+            return ResourceUtils.unauthorized("Display Name is not valid.", Response.Status.BAD_REQUEST);
+        }
+
+        if (!Email.isEmailValid(email)) {
+            return ResourceUtils.unauthorized("Email is not valid.", Response.Status.BAD_REQUEST);
+        }
+
+        if (!Password.isPasswordValid(password)) {
+            return ResourceUtils.unauthorized("Password is not valid.", Response.Status.BAD_REQUEST);
+        }
 
         RegisterService registerService = RegisterService.getInstance();
 
-        try{
+        try {
             String token = registerService.registerUser(handle, displayName, email, password);
 
             JsonObject returnSuccess = new JsonObject();
@@ -67,8 +79,8 @@ public class RegisterResource {
 
         } catch (BadDataException | UserExistsException e) {
             return ResourceUtils.unauthorized(e.getMessage(), Response.Status.BAD_REQUEST);
-        } catch (SQLException e) {
-            return ResourceUtils.unauthorized("Something went wrong.", Response.Status.INTERNAL_SERVER_ERROR);
+        } catch (ApplicationException e) {
+            return ResourceUtils.unauthorized("Something went wrong on our end.", Response.Status.INTERNAL_SERVER_ERROR);
         }
     }
 

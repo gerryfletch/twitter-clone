@@ -3,9 +3,6 @@ package me.gerryfletcher.twitter.config;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
 /**
  * Created by Gerry on 30/06/2017.
  */

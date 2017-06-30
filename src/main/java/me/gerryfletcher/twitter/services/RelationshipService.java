@@ -2,8 +2,8 @@ package me.gerryfletcher.twitter.services;
 
 import com.google.gson.JsonObject;
 import me.gerryfletcher.twitter.DAO.RelationshipDao;
-import me.gerryfletcher.twitter.models.RelationshipType;
 import me.gerryfletcher.twitter.exceptions.ApplicationException;
+import me.gerryfletcher.twitter.models.RelationshipType;
 
 import java.sql.SQLException;
 
@@ -43,14 +43,15 @@ public class RelationshipService {
 
     /**
      * Returns a JSON representation of a relationship.
-     *  Example: User 1 follows User 2, but User 2 does <b>not</b> follow User 1.
-     *  {
-     *      "following": true,
-     *      "mutuals": false
-     *  }
-     * @param follower_id   The user whos perspective it is from.
-     * @param following_id  The user we are comparing the relationship with.
-     * @return  A JSON representation of a relationship.
+     * Example: User 1 follows User 2, but User 2 does <b>not</b> follow User 1.
+     * {
+     * "following": true,
+     * "mutuals": false
+     * }
+     *
+     * @param follower_id  The user whos perspective it is from.
+     * @param following_id The user we are comparing the relationship with.
+     * @return A JSON representation of a relationship.
      * @throws ApplicationException In DB failiure.
      */
     public JsonObject getRelationshipJson(int follower_id, int following_id) throws ApplicationException {

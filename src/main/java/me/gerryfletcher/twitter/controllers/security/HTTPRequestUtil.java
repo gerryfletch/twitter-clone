@@ -8,12 +8,13 @@ import me.gerryfletcher.twitter.exceptions.BadDataException;
 public class HTTPRequestUtil {
     /**
      * Takes an Authorization header and extracts the JWT.
-     * @param auth  The full authorization <b>value</b>, e.g: <i>Bearer erahasodh...asdhaoishd...hasodihh</i>
-     * @return  The JWT
+     *
+     * @param auth The full authorization <b>value</b>, e.g: <i>Bearer erahasodh...asdhaoishd...hasodihh</i>
+     * @return The JWT
      */
     public static String getJWT(String auth) throws BadDataException {
         String[] authArray = auth.split(" ");
-        if(authArray.length == 2) {
+        if (authArray.length == 2) {
             return authArray[1];
         }
 

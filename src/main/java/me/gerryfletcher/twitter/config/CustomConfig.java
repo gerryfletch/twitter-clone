@@ -6,7 +6,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 /**
  * The Custom Config loaded. Includes the HTTP filter on startup.
  */
-public class CustomConfig  extends ResourceConfig{
+public class CustomConfig extends ResourceConfig {
     public CustomConfig() {
         packages("me.gerryfletcher.twitter");
         register(LoggingFilter.class);

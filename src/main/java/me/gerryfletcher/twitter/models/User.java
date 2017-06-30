@@ -3,12 +3,12 @@ package me.gerryfletcher.twitter.models;
 import com.google.gson.annotations.SerializedName;
 
 /**
- *  The User class models user data for quick access.
- *  The User class can be provided by the UserService
- *  singleton. It is created from a JsonObject, so
- *  the SerializedName's are important.
+ * The User class models user data for quick access.
+ * The User class can be provided by the UserService
+ * singleton. It is created from a JsonObject, so
+ * the SerializedName's are important.
  */
-public class User{
+public class User {
 
     private int uid;
     private String handle;
@@ -30,17 +30,39 @@ public class User{
     @SerializedName("number_of_following")
     private int numberOfFollowing;
 
-    User() {}
+    User() {
+    }
 
-    public int getId() { return uid; }
+    public int getId() {
+        return uid;
+    }
 
-    public String getHandle() { return handle; }
-    public String getDisplayName() { return displayName; }
-    public String getProfilePicture() { return profilePicture; }
-    public String getBio() { return bio; }
+    public String getHandle() {
+        return handle;
+    }
 
-    public int getNumberOfTweets() { return numberOfTweets; }
-    public int getNumberOfFollowers() { return numberOfFollowers; }
-    public int getNumberOfFollowing() { return numberOfFollowing; }
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public String getProfilePicture() {
+        return profilePicture;
+    }
+
+    public String getBio() {
+        return bio;
+    }
+
+    public int getNumberOfTweets() {
+        return numberOfTweets;
+    }
+
+    public int getNumberOfFollowers() {
+        return numberOfFollowers;
+    }
+
+    public int getNumberOfFollowing() {
+        return numberOfFollowing;
+    }
 
 }

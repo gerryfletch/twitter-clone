@@ -7,12 +7,11 @@ import com.google.gson.JsonObject;
 import me.gerryfletcher.twitter.controllers.security.HTTPRequestUtil;
 import me.gerryfletcher.twitter.controllers.security.JWTSecret;
 import me.gerryfletcher.twitter.exceptions.ApplicationException;
-import me.gerryfletcher.twitter.exceptions.UserNotExistsException;
-import me.gerryfletcher.twitter.models.Handle;
-import me.gerryfletcher.twitter.utilities.ResourceUtils;
 import me.gerryfletcher.twitter.exceptions.BadDataException;
+import me.gerryfletcher.twitter.exceptions.UserNotExistsException;
 import me.gerryfletcher.twitter.services.RelationshipService;
 import me.gerryfletcher.twitter.services.UserService;
+import me.gerryfletcher.twitter.utilities.ResourceUtils;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.GET;
@@ -20,7 +19,6 @@ import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
-import java.sql.SQLException;
 
 @Path("user")
 public class UserResource {
@@ -87,9 +85,10 @@ public class UserResource {
     /**
      * This initial GET checks if the user who sent the request
      * is the same as the path handle.
-     * @param auth  The JWT Bearer authentication sent in the HTTP request.
-     * @param handle    The handle to be edited.
-     * @return  Response 200 OK if it is fine, or unauthorized.
+     *
+     * @param auth   The JWT Bearer authentication sent in the HTTP request.
+     * @param handle The handle to be edited.
+     * @return Response 200 OK if it is fine, or unauthorized.
      */
     @Path("{handle}/edit")
     @RolesAllowed("User")

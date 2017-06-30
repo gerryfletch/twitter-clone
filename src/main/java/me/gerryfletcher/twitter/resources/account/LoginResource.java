@@ -19,7 +19,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.sql.*;
+import java.sql.SQLException;
 
 @Path("/login")
 public class LoginResource {
@@ -35,8 +35,9 @@ public class LoginResource {
      * Checks if a login is valid, verifies it against the DB and
      * creates a JSON web token to be included in the response for
      * local storage in the browser.
-     * @param json  JSON made up of handle + password
-     * @return      200 OK and JWT if successful, or a 401 Unauthorized
+     *
+     * @param json JSON made up of handle + password
+     * @return 200 OK and JWT if successful, or a 401 Unauthorized
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -59,11 +60,11 @@ public class LoginResource {
             return ResourceUtils.unauthorized("Handle or Password is empty.");
         }
 
-        if(!Handle.isHandleValid(handle)) {
+        if (!Handle.isHandleValid(handle)) {
             return ResourceUtils.unauthorized("Handle is invalid.", Response.Status.BAD_REQUEST);
         }
 
-        if(!Password.isPasswordValid(password)) {
+        if (!Password.isPasswordValid(password)) {
             return ResourceUtils.unauthorized("Password is invalid", Response.Status.BAD_REQUEST);
         }
 

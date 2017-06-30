@@ -2,16 +2,19 @@ package me.gerryfletcher.twitter.resources.relationships;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import me.gerryfletcher.twitter.models.RelationshipType;
 import me.gerryfletcher.twitter.controllers.security.HTTPRequestUtil;
 import me.gerryfletcher.twitter.controllers.security.JWTSecret;
 import me.gerryfletcher.twitter.exceptions.ApplicationException;
-import me.gerryfletcher.twitter.exceptions.UserNotExistsException;
 import me.gerryfletcher.twitter.exceptions.BadDataException;
+import me.gerryfletcher.twitter.exceptions.UserNotExistsException;
+import me.gerryfletcher.twitter.models.RelationshipType;
 import me.gerryfletcher.twitter.services.RelationshipService;
 import me.gerryfletcher.twitter.services.UserService;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -49,7 +52,7 @@ public class FollowResource {
         String handle = jwt.getClaim(token, "handle").asString();
         int uid = jwt.getClaim(token, "uid").asInt();
 
-        if(handle.equalsIgnoreCase(followHandle)) {
+        if (handle.equalsIgnoreCase(followHandle)) {
             return Response.status(Response.Status.BAD_REQUEST).build(); // Is themself
         }
 
@@ -57,7 +60,7 @@ public class FollowResource {
             RelationshipService rs = RelationshipService.getInstance();
             RelationshipType status = rs.getRelationship(uid, followId);
 
-            if(rs.setFollowing(uid, followId)) {
+            if (rs.setFollowing(uid, followId)) {
                 return Response.status(Response.Status.BAD_REQUEST).build(); // Already following
             }
 

@@ -33,13 +33,14 @@ public class UserService {
      * - Profile Picture
      * - Bio
      * - Statistics
-     *  - Number of Tweets
-     *  - Number of Followers
-     *  - Number of Following
-     * @param uid   The users ID.
-     * @return  JSON representation of a users profile.
-     * @throws UserNotExistsException   If the user does not exist.
-     * @throws ApplicationException In DB failiure.
+     * - Number of Tweets
+     * - Number of Followers
+     * - Number of Following
+     *
+     * @param uid The users ID.
+     * @return JSON representation of a users profile.
+     * @throws UserNotExistsException If the user does not exist.
+     * @throws ApplicationException   In DB failiure.
      */
     public JsonObject getUserJson(int uid) throws UserNotExistsException, ApplicationException {
         try {
@@ -66,10 +67,11 @@ public class UserService {
 
     /**
      * Gets a users ID from a handle.
-     * @param handle    The users handle.
-     * @return  The users integer ID.
-     * @throws UserNotExistsException   If the user does not exist.
-     * @throws ApplicationException In DB failiure.
+     *
+     * @param handle The users handle.
+     * @return The users integer ID.
+     * @throws UserNotExistsException If the user does not exist.
+     * @throws ApplicationException   In DB failiure.
      */
     public int getUserId(String handle) throws UserNotExistsException, ApplicationException {
         try {
@@ -82,10 +84,11 @@ public class UserService {
 
     /**
      * Gets a users handle from UID.
-     * @param uid   The users ID.
-     * @return  The users String handle.
-     * @throws UserNotExistsException   If the user does not exist.
-     * @throws ApplicationException In DB failiure.
+     *
+     * @param uid The users ID.
+     * @return The users String handle.
+     * @throws UserNotExistsException If the user does not exist.
+     * @throws ApplicationException   In DB failiure.
      */
     public String getUserHandle(int uid) throws UserNotExistsException, ApplicationException {
         try {

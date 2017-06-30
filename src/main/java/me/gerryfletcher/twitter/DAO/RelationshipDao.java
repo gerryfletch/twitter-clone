@@ -9,11 +9,12 @@ import java.sql.SQLException;
 
 public class RelationshipDao extends UtilDao {
 
-    public RelationshipDao() {}
-
     private final String GET_RELATIONSHIP_QUERY = "SELECT *" +
             "FROM followers " +
             "WHERE (follower_id = ? AND following_id = ?)";
+
+    public RelationshipDao() {
+    }
 
     /**
      * GetRelationship tells you the type of relationship between users, from the <b>first users point of view.</b>
@@ -27,15 +28,15 @@ public class RelationshipDao extends UtilDao {
 
         RelationshipType status = RelationshipType.NO_RELATIONSHIP;
 
-        try(Connection connection = getConnection();
-            PreparedStatement stmt = connection.prepareStatement(GET_RELATIONSHIP_QUERY)) {
+        try (Connection connection = getConnection();
+             PreparedStatement stmt = connection.prepareStatement(GET_RELATIONSHIP_QUERY)) {
 
             stmt.setInt(1, follower_id);
             stmt.setInt(2, following_id);
 
             ResultSet result = stmt.executeQuery();
 
-            if(! result.next()) {
+            if (!result.next()) {
                 return status;
             } else {
                 status = RelationshipType.FOLLOWING;
@@ -48,7 +49,7 @@ public class RelationshipDao extends UtilDao {
 
             ResultSet resultTwo = stmt.executeQuery();
 
-            if(resultTwo.next()) {
+            if (resultTwo.next()) {
                 status = RelationshipType.MUTUALS;
             }
 

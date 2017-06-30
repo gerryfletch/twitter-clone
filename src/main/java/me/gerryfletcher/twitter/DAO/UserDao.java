@@ -10,9 +10,16 @@ import java.sql.SQLException;
 
 public class UserDao extends UtilDao {
 
-    public UserDao() {}
-
     private final String GET_HANDLE_QUERY = "SELECT handle FROM users WHERE id=?";
+    private final String GET_UID_QUERY = "SELECT id FROM users WHERE handle=?";
+    private final String GET_PROFILE_QUERY = "SELECT handle, display_name, profile_picture, bio\n" +
+            "FROM users\n" +
+            "LEFT JOIN account_details\n" +
+            "ON users.id = account_details.id\n" +
+            "WHERE users.id = ?";
+
+    public UserDao() {
+    }
 
     /**
      * Gets a users handle from ID.
@@ -37,8 +44,6 @@ public class UserDao extends UtilDao {
         }
     }
 
-    private final String GET_UID_QUERY = "SELECT id FROM users WHERE handle=?";
-
     public int getUID(String handle) throws UserNotExistsException, SQLException {
         try (Connection connection = getConnection();
              PreparedStatement stmt = connection.prepareStatement(GET_UID_QUERY)) {
@@ -46,19 +51,13 @@ public class UserDao extends UtilDao {
             stmt.setString(1, handle);
             ResultSet result = stmt.executeQuery();
 
-            if(! result.next()) {
+            if (!result.next()) {
                 throw new UserNotExistsException();
             }
 
             return result.getInt(1);
         }
     }
-
-    private final String GET_PROFILE_QUERY = "SELECT handle, display_name, profile_picture, bio\n" +
-            "FROM users\n" +
-            "LEFT JOIN account_details\n" +
-            "ON users.id = account_details.id\n" +
-            "WHERE users.id = ?";
 
     /**
      * Returns a JSON representation of a users profile.
@@ -68,9 +67,9 @@ public class UserDao extends UtilDao {
      * - Profile Picture
      * - Bio
      * - Statistics
-     *  - Number of Tweets
-     *  - Number of Followers
-     *  - Number of Following
+     * - Number of Tweets
+     * - Number of Followers
+     * - Number of Following
      *
      * @param uid The users ID
      * @return JsonObject containing profile.

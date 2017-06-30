@@ -55,16 +55,17 @@ public abstract class UtilDao {
      * Checks if a record exists using an integer identifier.
      * Example - Does user exist:
      * boolean userExists = doesRecordExist("users", "id", 4);
-     * @param table The name of the table.
-     * @param column    The name of the column.
-     * @param identifier    The <b>integer</b> identifier.
-     * @return  True/False if the record exists.
+     *
+     * @param table      The name of the table.
+     * @param column     The name of the column.
+     * @param identifier The <b>integer</b> identifier.
+     * @return True/False if the record exists.
      * @throws SQLException In DB failiure.
      */
     protected boolean doesRecordExist(String table, String column, int identifier) throws SQLException {
         String query = "SELECT EXISTS(SELECT 1 FROM " + table + " WHERE " + column + "=? LIMIT 1)";
-        try(Connection connection = dataSource.getConnection();
-            PreparedStatement stmt = connection.prepareStatement(query)) {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(query)) {
 
             stmt.setInt(1, identifier);
             ResultSet result = stmt.executeQuery();
@@ -78,16 +79,17 @@ public abstract class UtilDao {
      * Checks if a record exists using a String identifier.
      * Example - Does email exist:
      * boolean emailExists = doesRecordExist("users", "email", "example@gmail.com");
-     * @param table The name of the table.
-     * @param column    The name of the column.
-     * @param identifier    The <b>String</b> identifier.
-     * @return  In DB failiure.
+     *
+     * @param table      The name of the table.
+     * @param column     The name of the column.
+     * @param identifier The <b>String</b> identifier.
+     * @return In DB failiure.
      * @throws SQLException
      */
     protected boolean doesRecordExist(String table, String column, String identifier) throws SQLException {
         String query = "SELECT EXISTS(SELECT 1 FROM " + table + " WHERE lower(" + column + ")=? LIMIT 1)";
-        try(Connection connection = dataSource.getConnection();
-            PreparedStatement stmt = connection.prepareStatement(query)) {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(query)) {
 
             stmt.setString(1, identifier);
             ResultSet result = stmt.executeQuery();

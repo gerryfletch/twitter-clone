@@ -33,7 +33,7 @@ public class ResourceUtils {
      *
      * @param error  A user-friendly error.
      * @param status A HTTP status code.
-     * @return  The Response object with a JSON error in the body.
+     * @return The Response object with a JSON error in the body.
      */
     public static Response unauthorized(String error, Response.StatusType status) {
         System.out.println("ERROR: " + error);

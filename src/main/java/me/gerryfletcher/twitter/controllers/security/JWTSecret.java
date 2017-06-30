@@ -15,9 +15,13 @@ import java.sql.Date;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-public class JWTSecret implements SecretKey{
+public class JWTSecret implements SecretKey {
 
     private static final String key = "xpxopjj1gp%%08*@+xt1m&8ypg1n8emp@jt5f5d)okev=nz)jo(%k8gerreh";
+
+    public static String getKey() {
+        return key;
+    }
 
     @Override
     public String getAlgorithm() {
@@ -34,24 +38,21 @@ public class JWTSecret implements SecretKey{
         return null;
     }
 
-    public static String getKey() {
-        return key;
-    }
-
     /**
      * Checks if the JWT is valid.
+     *
      * @param token The JSON Web token
      * @return true/false
      */
     public boolean validateToken(String token) {
-        try{
+        try {
             Algorithm algorithm = Algorithm.HMAC256(key);
             JWTVerifier verifier = JWT.require(algorithm)
                     .withIssuer("auth0")
                     .build(); //Reusable verifier instance
             DecodedJWT jwt = verifier.verify(token);
             return true;
-        }  catch (UnsupportedEncodingException exception) {
+        } catch (UnsupportedEncodingException exception) {
             System.out.println("UTF-8 encoding not supported.");
             return false;
         } catch (JWTVerificationException exception) {
@@ -61,10 +62,12 @@ public class JWTSecret implements SecretKey{
     }
 
     /**
-     * Generates a salted JW token with user id and role included.
+     * Generates a salted JW token with User ID, Handle and Role in the payload.
+     *
      * @param userId Integer unique user ID
+     * @param handle The users handle.
      * @param role   User/Admin etc
-     * @return       The token
+     * @return The token
      */
     public String generateToken(int userId, String handle, String role) {
         try {
@@ -75,7 +78,7 @@ public class JWTSecret implements SecretKey{
                     .withClaim("uid", userId) //ID from DB
                     .withClaim("handle", handle)
                     .withClaim("role", role) //role from DB  (alt: permission int? )
-                    .withExpiresAt(new Date( now + TimeUnit.HOURS.toMillis(2)))
+                    .withExpiresAt(new Date(now + TimeUnit.HOURS.toMillis(2)))
                     .sign(algorithm);
         } catch (UnsupportedEncodingException exception) {
             System.out.println("UTF 8 encoding not supported.");

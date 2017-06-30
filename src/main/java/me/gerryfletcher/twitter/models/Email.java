@@ -4,8 +4,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
-    Email regex:
-    http://emailregex.com/
+ * Email regex:
+ * http://emailregex.com/
  */
 public class Email {
 

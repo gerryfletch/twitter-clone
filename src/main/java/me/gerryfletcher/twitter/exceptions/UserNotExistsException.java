@@ -1,7 +1,5 @@
 package me.gerryfletcher.twitter.exceptions;
 
-import java.sql.SQLException;
-
 /**
  * The UserNotExistsException is used when a query
  * doesn't return a user.

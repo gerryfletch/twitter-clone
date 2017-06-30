@@ -3,7 +3,7 @@ package me.gerryfletcher.twitter.exceptions;
 /**
  * This exception is thrown if an SQL query returns no rows.
  */
-public class RecordNotExistsException extends Exception{
+public class RecordNotExistsException extends Exception {
     public RecordNotExistsException() {
         super("No records returned.");
     }

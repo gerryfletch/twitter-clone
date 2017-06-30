@@ -1,7 +1,7 @@
 package me.gerryfletcher.twitter.config;
 
-import java.lang.reflect.Method;
-import java.util.*;
+import me.gerryfletcher.twitter.controllers.security.JWTSecret;
+import org.glassfish.jersey.internal.util.Base64;
 
 import javax.annotation.security.DenyAll;
 import javax.annotation.security.PermitAll;
@@ -12,14 +12,16 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
-
-import me.gerryfletcher.twitter.controllers.security.JWTSecret;
-import org.glassfish.jersey.internal.util.Base64;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * This filter will allow or deny access to a resource depending on
  * resource annotation.
- *
+ * <p>
  * If a resource requires a user type, authentication is required.
  * Currently JWT authentication is fully implemented. If the token
  * is valid, the role is extracted and checked against the resource.
@@ -27,27 +29,25 @@ import org.glassfish.jersey.internal.util.Base64;
 @Provider
 public class AuthenticationFilter implements javax.ws.rs.container.ContainerRequestFilter {
 
+    private static final String AUTHORIZATION_PROPERTY = "Authorization";
     @Context
     private ResourceInfo resourceInfo;
-
-    private static final String AUTHORIZATION_PROPERTY = "Authorization";
-
     private Method method;
 
     /**
      * The filter checks all incoming HTTP requests.
      * If the resource has a PermitAll or DenyAll annotation, the request will be
      * passed or rejected with no further checks.
-     *
+     * <p>
      * If there is no authorization present at all, it is rejected unauthorized.
-     *
+     * <p>
      * The filter then checks for basic and bearer authentication.
      * Basic auth is no longer used, but the helper methods are still available for
      * future expansion.
-     *
+     * <p>
      * If the user does not have the correct permissions, they are aborted unauthorized.
      *
-     * @param requestContext    The HTTP request.
+     * @param requestContext The HTTP request.
      */
     @Override
     public void filter(ContainerRequestContext requestContext) {
@@ -60,11 +60,11 @@ public class AuthenticationFilter implements javax.ws.rs.container.ContainerRequ
 
         this.method = resourceInfo.getResourceMethod();
 
-        if(this.method.isAnnotationPresent(PermitAll.class)) {
+        if (this.method.isAnnotationPresent(PermitAll.class)) {
             return;
         }
 
-        if(this.method.isAnnotationPresent(DenyAll.class)) {
+        if (this.method.isAnnotationPresent(DenyAll.class)) {
             requestContext.abortWith(ACCESS_FORBIDDEN);
             return;
         }
@@ -97,7 +97,7 @@ public class AuthenticationFilter implements javax.ws.rs.container.ContainerRequ
                 break;
         }
 
-        if(! authorized) {
+        if (!authorized) {
             requestContext.abortWith(ACCESS_UNAUTHORIZED);
         }
     }
@@ -106,14 +106,15 @@ public class AuthenticationFilter implements javax.ws.rs.container.ContainerRequ
      * Checks a Json Web Token for validity.
      * The role claim is extracted from the JWT, and checked against the role set for
      * the resource.
+     *
      * @param token The Json Web Token supplied.
-     * @return  True or False if the user is verified.
+     * @return True or False if the user is verified.
      */
     private boolean checkBearerAuth(String token) {
         JWTSecret jwt = new JWTSecret();
         System.out.println("TOKEN: " + token);
 
-        if(! jwt.validateToken(token)) {
+        if (!jwt.validateToken(token)) {
             return false;
         }
 
@@ -122,7 +123,7 @@ public class AuthenticationFilter implements javax.ws.rs.container.ContainerRequ
             RolesAllowed rolesAnnotation = this.method.getAnnotation(RolesAllowed.class);
             Set<String> rolesSet = new HashSet<>(Arrays.asList(rolesAnnotation.value()));
             String role = jwt.getClaim(token, "role").asString();
-            if (! rolesSet.contains(role)) {
+            if (!rolesSet.contains(role)) {
                 return false;
             }
         }
@@ -134,8 +135,9 @@ public class AuthenticationFilter implements javax.ws.rs.container.ContainerRequ
      * Checks the username and password against the DB.
      * DB functions have been removed, and checks if username is 'admin' and
      * password is 'password'.
-     * @param authorizationHeader   The authorization header to be split.
-     * @return  True or False if the user is verified.
+     *
+     * @param authorizationHeader The authorization header to be split.
+     * @return True or False if the user is verified.
      */
     private boolean checkBasicAuth(String[] authorizationHeader) {
         String userRole = "UserResource";
@@ -144,7 +146,7 @@ public class AuthenticationFilter implements javax.ws.rs.container.ContainerRequ
 
         String[] usernameAndPassword = token.split(":");
 
-        if(usernameAndPassword.length < 2) {
+        if (usernameAndPassword.length < 2) {
             return false;
         }
 
@@ -156,7 +158,7 @@ public class AuthenticationFilter implements javax.ws.rs.container.ContainerRequ
             RolesAllowed rolesAnnotation = this.method.getAnnotation(RolesAllowed.class);
             Set<String> rolesSet = new HashSet<>(Arrays.asList(rolesAnnotation.value()));
 
-            if (! rolesSet.contains(userRole)) {
+            if (!rolesSet.contains(userRole)) {
                 return false;
             }
         }
@@ -166,8 +168,9 @@ public class AuthenticationFilter implements javax.ws.rs.container.ContainerRequ
 
     /**
      * Helper function to decode base 64 strings.
-     * @param str   The base 64 encoded string
-     * @return      The decoded string.
+     *
+     * @param str The base 64 encoded string
+     * @return The decoded string.
      */
     private String decode64(String str) {
         return new String(Base64.decode(str.getBytes()));

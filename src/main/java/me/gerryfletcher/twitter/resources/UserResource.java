@@ -6,6 +6,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import me.gerryfletcher.twitter.controllers.security.HTTPRequestUtil;
 import me.gerryfletcher.twitter.controllers.security.JWTSecret;
+import me.gerryfletcher.twitter.exceptions.ApplicationException;
 import me.gerryfletcher.twitter.exceptions.UserNotExistsException;
 import me.gerryfletcher.twitter.models.Handle;
 import me.gerryfletcher.twitter.utilities.ResourceUtils;
@@ -54,7 +55,7 @@ public class UserResource {
             if (!UserService.getInstance().doesHandleExist(handle)) {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
-        } catch (SQLException e) {
+        } catch (ApplicationException e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
 
@@ -68,7 +69,7 @@ public class UserResource {
         try {
             UserService us = UserService.getInstance();
             int userId = us.getUserId(handle);
-            JsonObject profile = us.getJsonProfile(userId);
+            JsonObject profile = us.getUserJson(userId);
 
             RelationshipService rs = RelationshipService.getInstance();
             JsonObject relationship = rs.getRelationshipJson(requestId, userId);
@@ -78,7 +79,7 @@ public class UserResource {
         } catch (UserNotExistsException e) {
             e.printStackTrace();
             return ResourceUtils.unauthorized(e.getMessage(), Response.Status.FORBIDDEN);
-        } catch (SQLException ev) {
+        } catch (ApplicationException e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -103,7 +104,7 @@ public class UserResource {
             JWTSecret jwtSecret = new JWTSecret();
 
             int headerUID = jwtSecret.getClaim(token, "uid").asInt(); // User ID
-            String headerHandle = userService.getHandle(headerUID);
+            String headerHandle = userService.getUserHandle(headerUID);
 
             if (!headerHandle.equals(handle)) {
                 JsonObject response = new JsonObject();
@@ -119,7 +120,7 @@ public class UserResource {
         } catch (BadDataException | UserNotExistsException e) {
             e.printStackTrace();
             return Response.status(Response.Status.BAD_REQUEST).build();
-        } catch (SQLException e) {
+        } catch (ApplicationException e) {
             e.printStackTrace();
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }

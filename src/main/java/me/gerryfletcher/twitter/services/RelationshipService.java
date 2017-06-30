@@ -3,6 +3,7 @@ package me.gerryfletcher.twitter.services;
 import com.google.gson.JsonObject;
 import me.gerryfletcher.twitter.controllers.relationships.RelationshipType;
 import me.gerryfletcher.twitter.controllers.sqlite.SQLUtils;
+import me.gerryfletcher.twitter.exceptions.ApplicationException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -92,12 +93,7 @@ public class RelationshipService {
      * @return True if successful, false if they are already following.
      */
     public boolean setFollowing(int uid, int followId) {
-        try {
-            UserService userService = UserService.getInstance();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
+        UserService userService = UserService.getInstance();
         return false;
     }
 }

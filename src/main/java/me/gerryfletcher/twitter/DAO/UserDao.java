@@ -71,9 +71,9 @@ public class UserDao extends UtilDao {
      * - Profile Picture
      * - Bio
      * - Statistics
-     * - Number of Tweets
-     * - Number of Followers
-     * - Number of Following
+     *  - Number of Tweets
+     *  - Number of Followers
+     *  - Number of Following
      *
      * @param uid The users ID
      * @return JsonObject containing profile.
@@ -134,6 +134,10 @@ public class UserDao extends UtilDao {
      */
     public boolean doesEmailExist(String email) throws SQLException {
         return doesRecordExist("users", "email", email);
+    }
+
+    public boolean doesHandleExist(String handle) throws SQLException {
+        return doesRecordExist("users", "handle", handle);
     }
 
 }

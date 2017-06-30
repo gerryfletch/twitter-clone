@@ -2,6 +2,7 @@ package me.gerryfletcher.twitter.services;
 
 import me.gerryfletcher.twitter.controllers.security.JWTSecret;
 import me.gerryfletcher.twitter.controllers.sqlite.SQLUtils;
+import me.gerryfletcher.twitter.exceptions.ApplicationException;
 import me.gerryfletcher.twitter.exceptions.BadDataException;
 import me.gerryfletcher.twitter.exceptions.UserExistsException;
 import me.gerryfletcher.twitter.models.DisplayName;
@@ -112,7 +113,7 @@ public class RegisterService {
             if(userService.doesEmailExist(email)) {
                 throw new UserExistsException("This email already exists.");
             }
-        } catch (SQLException e) {
+        } catch (ApplicationException e) {
             throw new SQLException("Something went wrong");
         }
     }

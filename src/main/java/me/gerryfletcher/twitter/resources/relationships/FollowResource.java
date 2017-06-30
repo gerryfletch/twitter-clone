@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import me.gerryfletcher.twitter.controllers.relationships.RelationshipType;
 import me.gerryfletcher.twitter.controllers.security.HTTPRequestUtil;
 import me.gerryfletcher.twitter.controllers.security.JWTSecret;
+import me.gerryfletcher.twitter.exceptions.ApplicationException;
 import me.gerryfletcher.twitter.exceptions.UserNotExistsException;
 import me.gerryfletcher.twitter.models.Handle;
 import me.gerryfletcher.twitter.exceptions.BadDataException;
@@ -34,7 +35,7 @@ public class FollowResource {
             followId = UserService.getInstance().getUserId(followHandle);
         } catch (UserNotExistsException e) {
             return Response.status(Response.Status.BAD_REQUEST).build();
-        } catch (SQLException e) {
+        } catch (ApplicationException e) {
             e.printStackTrace();
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }

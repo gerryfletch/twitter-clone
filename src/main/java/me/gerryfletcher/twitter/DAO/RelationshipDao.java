@@ -1,17 +1,12 @@
 package me.gerryfletcher.twitter.DAO;
 
-import com.google.gson.JsonObject;
-import me.gerryfletcher.twitter.controllers.relationships.RelationshipType;
-import me.gerryfletcher.twitter.exceptions.UserNotExistsException;
+import me.gerryfletcher.twitter.models.RelationshipType;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-/**
- * Created by Gerry on 30/06/2017.
- */
 public class RelationshipDao extends UtilDao {
 
     public RelationshipDao() {}
@@ -23,10 +18,10 @@ public class RelationshipDao extends UtilDao {
     /**
      * GetRelationship tells you the type of relationship between users, from the <b>first users point of view.</b>
      *
-     * @param follower_id  The user whos persective it is from
-     * @param following_id The user we are comparing the relationship with
-     * @return The relationshipType enum
-     * @throws SQLException
+     * @param follower_id  The user whos persective it is from.
+     * @param following_id The user we are comparing the relationship with.
+     * @return The relationshipType enum.
+     * @throws SQLException In DB failiure.
      */
     public RelationshipType getRelationship(int follower_id, int following_id) throws SQLException {
 

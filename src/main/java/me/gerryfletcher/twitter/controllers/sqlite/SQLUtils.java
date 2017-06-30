@@ -1,9 +1,9 @@
 package me.gerryfletcher.twitter.controllers.sqlite;
 
 import com.zaxxer.hikari.HikariDataSource;
+import me.gerryfletcher.twitter.config.DBHandler;
 import me.gerryfletcher.twitter.models.Password;
 
-import javax.sql.DataSource;
 import java.sql.*;
 
 public class SQLUtils {

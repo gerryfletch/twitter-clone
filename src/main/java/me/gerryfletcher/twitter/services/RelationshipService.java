@@ -2,7 +2,7 @@ package me.gerryfletcher.twitter.services;
 
 import com.google.gson.JsonObject;
 import me.gerryfletcher.twitter.DAO.RelationshipDao;
-import me.gerryfletcher.twitter.controllers.relationships.RelationshipType;
+import me.gerryfletcher.twitter.models.RelationshipType;
 import me.gerryfletcher.twitter.exceptions.ApplicationException;
 
 import java.sql.SQLException;

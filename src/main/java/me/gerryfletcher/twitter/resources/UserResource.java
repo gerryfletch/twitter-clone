@@ -47,7 +47,7 @@ public class UserResource {
      * @return Response 200 OK with the profile in JSON, 404 not found, or 403 forbidden if there is another error.
      */
     @Path("{handle}")
-    @RolesAllowed("User")
+    @RolesAllowed("user")
     @GET
     public Response getUserProfile(@HeaderParam("authorization") String auth, @PathParam("handle") String handle) {
 

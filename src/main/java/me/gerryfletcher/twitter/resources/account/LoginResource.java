@@ -4,8 +4,11 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import me.gerryfletcher.twitter.exceptions.ApplicationException;
 import me.gerryfletcher.twitter.exceptions.BadDataException;
 import me.gerryfletcher.twitter.exceptions.UserNotExistsException;
+import me.gerryfletcher.twitter.models.Handle;
+import me.gerryfletcher.twitter.models.Password;
 import me.gerryfletcher.twitter.services.LoginService;
 import me.gerryfletcher.twitter.utilities.ResourceUtils;
 
@@ -32,7 +35,7 @@ public class LoginResource {
      * Checks if a login is valid, verifies it against the DB and
      * creates a JSON web token to be included in the response for
      * local storage in the browser.
-     * @param json  JSON made up of username + password
+     * @param json  JSON made up of handle + password
      * @return      200 OK and JWT if successful, or a 401 Unauthorized
      */
     @POST
@@ -49,21 +52,29 @@ public class LoginResource {
 
         /*
          *  Checks for each data type, returning a user-friendly error
-         *  and 401 Unauthorized HTTP response code
+         *  and 400 Bad Request / 401 Unauthorized HTTP response code
          */
 
         if (handle.isEmpty() || password.isEmpty()) {
             return ResourceUtils.unauthorized("Handle or Password is empty.");
         }
 
-        LoginService loginService = LoginService.getInstance();
+        if(!Handle.isHandleValid(handle)) {
+            return ResourceUtils.unauthorized("Handle is invalid.", Response.Status.BAD_REQUEST);
+        }
+
+        if(!Password.isPasswordValid(password)) {
+            return ResourceUtils.unauthorized("Password is invalid", Response.Status.BAD_REQUEST);
+        }
 
         String token;
+
         try {
+            LoginService loginService = LoginService.getInstance();
             token = loginService.loginUser(handle, password);
         } catch (BadDataException | UserNotExistsException e) {
             return ResourceUtils.unauthorized(e.getMessage());
-        } catch (SQLException ev) {
+        } catch (ApplicationException ev) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
 

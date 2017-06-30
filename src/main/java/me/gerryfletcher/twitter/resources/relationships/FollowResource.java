@@ -2,12 +2,11 @@ package me.gerryfletcher.twitter.resources.relationships;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import me.gerryfletcher.twitter.controllers.relationships.RelationshipType;
+import me.gerryfletcher.twitter.models.RelationshipType;
 import me.gerryfletcher.twitter.controllers.security.HTTPRequestUtil;
 import me.gerryfletcher.twitter.controllers.security.JWTSecret;
 import me.gerryfletcher.twitter.exceptions.ApplicationException;
 import me.gerryfletcher.twitter.exceptions.UserNotExistsException;
-import me.gerryfletcher.twitter.models.Handle;
 import me.gerryfletcher.twitter.exceptions.BadDataException;
 import me.gerryfletcher.twitter.services.RelationshipService;
 import me.gerryfletcher.twitter.services.UserService;
@@ -15,7 +14,6 @@ import me.gerryfletcher.twitter.services.UserService;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.sql.SQLException;
 
 
 @Path("/relationship")

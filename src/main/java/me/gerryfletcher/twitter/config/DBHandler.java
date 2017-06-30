@@ -1,4 +1,4 @@
-package me.gerryfletcher.twitter.controllers.sqlite;
+package me.gerryfletcher.twitter.config;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;

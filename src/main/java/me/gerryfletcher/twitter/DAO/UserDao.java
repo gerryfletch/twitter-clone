@@ -1,7 +1,6 @@
 package me.gerryfletcher.twitter.DAO;
 
 import com.google.gson.JsonObject;
-import com.zaxxer.hikari.HikariDataSource;
 import me.gerryfletcher.twitter.exceptions.UserNotExistsException;
 
 import java.sql.Connection;

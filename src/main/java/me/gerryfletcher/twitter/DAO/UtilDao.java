@@ -1,7 +1,7 @@
 package me.gerryfletcher.twitter.DAO;
 
 import com.zaxxer.hikari.HikariDataSource;
-import me.gerryfletcher.twitter.controllers.sqlite.DBHandler;
+import me.gerryfletcher.twitter.config.DBHandler;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

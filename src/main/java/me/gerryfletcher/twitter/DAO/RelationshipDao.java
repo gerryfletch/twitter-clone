@@ -13,8 +13,7 @@ public class RelationshipDao extends UtilDao {
             "FROM followers " +
             "WHERE (follower_id = ? AND following_id = ?)";
 
-    public RelationshipDao() {
-    }
+    public RelationshipDao() {}
 
     /**
      * GetRelationship tells you the type of relationship between users, from the <b>first users point of view.</b>
@@ -59,4 +58,30 @@ public class RelationshipDao extends UtilDao {
 
     }
 
+    private final String SET_FOLLOWING_QUERY = "INSERT INTO followers(follower_id, following_id) VALUES(?,?)";
+
+    public void setFollowing(int userId, int idToFollow) throws SQLException {
+        try(Connection connection = getConnection();
+            PreparedStatement stmt = connection.prepareStatement(SET_FOLLOWING_QUERY)) {
+
+            stmt.setInt(1, userId);
+            stmt.setInt(2, idToFollow);
+
+            stmt.executeUpdate();
+        }
+    }
+
+    private final String UNSET_FOLLOWING_QUERY = "DELETE FROM followers WHERE (follower_id=? AND following_id=?)";
+
+    public void unsetFollowing(int userId, int idToUnfollow) throws SQLException {
+        try(Connection connection = getConnection();
+            PreparedStatement stmt = connection.prepareStatement(UNSET_FOLLOWING_QUERY)) {
+
+            stmt.setInt(1, userId);
+            stmt.setInt(2, idToUnfollow);
+
+            stmt.executeUpdate();
+
+        }
+    }
 }

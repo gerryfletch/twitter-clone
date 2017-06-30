@@ -1,72 +1,100 @@
 package me.gerryfletcher.twitter.resources.relationships;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import me.gerryfletcher.twitter.controllers.security.HTTPRequestUtil;
 import me.gerryfletcher.twitter.controllers.security.JWTSecret;
 import me.gerryfletcher.twitter.exceptions.ApplicationException;
 import me.gerryfletcher.twitter.exceptions.BadDataException;
 import me.gerryfletcher.twitter.exceptions.UserNotExistsException;
+import me.gerryfletcher.twitter.models.Handle;
 import me.gerryfletcher.twitter.models.RelationshipType;
 import me.gerryfletcher.twitter.services.RelationshipService;
-import me.gerryfletcher.twitter.services.UserService;
+import me.gerryfletcher.twitter.utilities.ResourceUtils;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 
-@Path("/relationship")
+@Path("/user/{handle}")
 public class FollowResource {
-
-    private Gson gson = new Gson();
 
     @POST
     @Path("/follow")
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Response followUser(@HeaderParam("authorization") String auth, String requestJson) {
+    public Response followUser(@HeaderParam("authorization") String auth, @PathParam("handle") String handleToFollow) {
 
-        JsonObject request = gson.fromJson(requestJson, JsonObject.class);
-        String followHandle = request.get("handle").getAsString();
-        int followId;
-        try {
-            followId = UserService.getInstance().getUserId(followHandle);
-        } catch (UserNotExistsException e) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
-        } catch (ApplicationException e) {
-            e.printStackTrace();
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        if(! Handle.isHandleValid(handleToFollow)) {
+            return ResourceUtils.unauthorized("Invalid handle.", Response.Status.BAD_REQUEST); // Invalid Handle
         }
 
-        String token;
+        String userHandle;
         try {
-            token = HTTPRequestUtil.getJWT(auth);
+            String token = HTTPRequestUtil.getJWT(auth);
+            JWTSecret jwt = new JWTSecret();
+            userHandle = jwt.getClaim(token, "handle").asString();
         } catch (BadDataException e) {
             return Response.status(Response.Status.UNAUTHORIZED).build(); // Invalid token
         }
 
-        JWTSecret jwt = new JWTSecret();
-        String handle = jwt.getClaim(token, "handle").asString();
-        int uid = jwt.getClaim(token, "uid").asInt();
-
-        if (handle.equalsIgnoreCase(followHandle)) {
+        if (userHandle.equalsIgnoreCase(handleToFollow)) {
             return Response.status(Response.Status.BAD_REQUEST).build(); // Is themself
         }
 
         try {
             RelationshipService rs = RelationshipService.getInstance();
-            RelationshipType status = rs.getRelationship(uid, followId);
+            RelationshipType status = rs.getRelationship(userHandle, handleToFollow);
 
-            if (rs.setFollowing(uid, followId)) {
-                return Response.status(Response.Status.BAD_REQUEST).build(); // Already following
+            if(status == RelationshipType.FOLLOWING || status == RelationshipType.MUTUALS) {
+                return ResourceUtils.unauthorized("You're already following this user.", Response.Status.BAD_REQUEST); // Already following
             }
+
+            rs.setFollowing(userHandle, handleToFollow);
 
         } catch (ApplicationException e) {
             e.printStackTrace();
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        } catch (UserNotExistsException e) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+
+        return Response.ok().build();
+    }
+
+    @POST
+    @Path("/unfollow")
+    public Response unfollowUser(@HeaderParam("authorization") String auth, @PathParam("handle") String handleToUnfollow) {
+
+        if(! Handle.isHandleValid(handleToUnfollow)) {
+            return ResourceUtils.unauthorized("Invalid handle.", Response.Status.BAD_REQUEST);
+        }
+
+        String userHandle;
+        try {
+            String token = HTTPRequestUtil.getJWT(auth);
+            JWTSecret jwt = new JWTSecret();
+            userHandle = jwt.getClaim(token, "handle").asString();
+        } catch (BadDataException e) {
+            return Response.status(Response.Status.UNAUTHORIZED).build(); // Invalid token
+        }
+
+        if(userHandle.equalsIgnoreCase(handleToUnfollow)) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+
+        RelationshipService relationshipService = RelationshipService.getInstance();
+        try {
+            RelationshipType status = relationshipService.getRelationship(userHandle, handleToUnfollow);
+
+            if(status == RelationshipType.NO_RELATIONSHIP) {
+                return Response.status(Response.Status.BAD_REQUEST).build();
+            }
+
+            relationshipService.unsetFollowing(userHandle, handleToUnfollow);
+
+        } catch (ApplicationException e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        } catch (UserNotExistsException e) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
         return Response.ok().build();

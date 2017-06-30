@@ -2,7 +2,9 @@ package me.gerryfletcher.twitter.services;
 
 import com.google.gson.JsonObject;
 import me.gerryfletcher.twitter.DAO.RelationshipDao;
+import me.gerryfletcher.twitter.DAO.UserDao;
 import me.gerryfletcher.twitter.exceptions.ApplicationException;
+import me.gerryfletcher.twitter.exceptions.UserNotExistsException;
 import me.gerryfletcher.twitter.models.RelationshipType;
 
 import java.sql.SQLException;
@@ -11,9 +13,11 @@ public class RelationshipService {
 
     private static RelationshipService instance = null;
     private RelationshipDao relationshipDao;
+    private final UserDao userDao;
 
     private RelationshipService() {
         this.relationshipDao = new RelationshipDao();
+        this.userDao = new UserDao();
     }
 
 
@@ -38,6 +42,19 @@ public class RelationshipService {
         } catch (SQLException e) {
             e.printStackTrace();
             throw new ApplicationException("Problem getting Relationship from DAO", e);
+        }
+    }
+
+    public RelationshipType getRelationship(String follower_handle, String following_handle) throws ApplicationException {
+        try {
+            int follower_id = userDao.getUID(follower_handle);
+            int following_id = userDao.getUID(following_handle);
+
+            return getRelationship(follower_id, following_id);
+        } catch (UserNotExistsException e) {
+            return RelationshipType.NO_RELATIONSHIP;
+        } catch (SQLException e) {
+            throw new ApplicationException("Problem getting Relationship from DAO.", e);
         }
     }
 
@@ -67,15 +84,27 @@ public class RelationshipService {
         return response;
     }
 
-    /**
-     * Makes user 1 follow user 2.
-     *
-     * @param uid      User 1 ID.
-     * @param followId Receiving user 2 ID.
-     * @return True if successful, false if they are already following.
-     */
-    public boolean setFollowing(int uid, int followId) {
-        UserService userService = UserService.getInstance();
-        return false;
+    public void setFollowing(String userHandle, String handleToFollow) throws ApplicationException, UserNotExistsException {
+        try {
+            int userId = userDao.getUID(userHandle);
+            int idToFollow = userDao.getUID(handleToFollow);
+
+            relationshipDao.setFollowing(userId, idToFollow);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new ApplicationException("Problem setting Relationship in DAO.", e);
+        }
+    }
+
+    public void unsetFollowing(String userHandle, String handleToUnfollow) throws ApplicationException, UserNotExistsException {
+        try {
+            int userId = userDao.getUID(userHandle);
+            int idToUnfollow = userDao.getUID(handleToUnfollow);
+
+            relationshipDao.unsetFollowing(userId, idToUnfollow);
+        } catch (SQLException e) {
+            throw new ApplicationException("Problem unsetting Relationship in DAO", e);
+        }
     }
 }

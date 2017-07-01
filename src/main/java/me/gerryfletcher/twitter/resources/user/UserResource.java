@@ -1,4 +1,4 @@
-package me.gerryfletcher.twitter.resources;
+package me.gerryfletcher.twitter.resources.user;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
@@ -30,6 +30,8 @@ public class UserResource {
             .create();
 
     /**
+     * TODO: Create a PermitAll roles version for public profiles.
+     *
      * Returns a users public profile data:
      * - Display name
      * - Profile Picture
@@ -58,12 +60,8 @@ public class UserResource {
         }
 
         JWTSecret jwt = new JWTSecret();
-        int requestId;
-        try {
-            requestId = jwt.getClaim(HTTPRequestUtil.getJWT(auth), "uid").asInt();
-        } catch (BadDataException e) {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
+        int requestId = jwt.getClaim(HTTPRequestUtil.getJWT(auth), "uid").asInt();
+
         try {
             UserService us = UserService.getInstance();
             int userId = us.getUserId(handle);
@@ -78,49 +76,6 @@ public class UserResource {
             e.printStackTrace();
             return ResourceUtils.unauthorized(e.getMessage(), Response.Status.FORBIDDEN);
         } catch (ApplicationException e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
-    /**
-     * This initial GET checks if the user who sent the request
-     * is the same as the path handle.
-     *
-     * @param auth   The JWT Bearer authentication sent in the HTTP request.
-     * @param handle The handle to be edited.
-     * @return Response 200 OK if it is fine, or unauthorized.
-     */
-    @Path("{handle}/edit")
-    @RolesAllowed("User")
-    @GET
-    public Response verifyUser(@HeaderParam("authorization") String auth, @PathParam("handle") String handle) {
-
-        try {
-
-            UserService userService = UserService.getInstance();
-
-            String token = HTTPRequestUtil.getJWT(auth); // JWT
-            JWTSecret jwtSecret = new JWTSecret();
-
-            int headerUID = jwtSecret.getClaim(token, "uid").asInt(); // User ID
-            String headerHandle = userService.getUserHandle(headerUID);
-
-            if (!headerHandle.equals(handle)) {
-                JsonObject response = new JsonObject();
-                response.addProperty("handle", handle);
-                return Response
-                        .status(Response.Status.UNAUTHORIZED)
-                        .entity(gson.toJson(response))
-                        .build();
-            } else {
-                return Response.ok().build();
-            }
-
-        } catch (BadDataException | UserNotExistsException e) {
-            e.printStackTrace();
-            return Response.status(Response.Status.BAD_REQUEST).build();
-        } catch (ApplicationException e) {
-            e.printStackTrace();
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }

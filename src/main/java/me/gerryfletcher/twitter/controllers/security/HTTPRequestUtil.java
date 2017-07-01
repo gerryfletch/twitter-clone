@@ -1,10 +1,5 @@
 package me.gerryfletcher.twitter.controllers.security;
 
-import me.gerryfletcher.twitter.exceptions.BadDataException;
-
-/**
- * Created by Gerry on 25/06/2017.
- */
 public class HTTPRequestUtil {
     /**
      * Takes an Authorization header and extracts the JWT.
@@ -12,12 +7,12 @@ public class HTTPRequestUtil {
      * @param auth The full authorization <b>value</b>, e.g: <i>Bearer erahasodh...asdhaoishd...hasodihh</i>
      * @return The JWT
      */
-    public static String getJWT(String auth) throws BadDataException {
+    public static String getJWT(String auth) {
         String[] authArray = auth.split(" ");
         if (authArray.length == 2) {
             return authArray[1];
+        } else {
+            return null;
         }
-
-        throw new BadDataException("Badly formatted authorization header.");
     }
 }

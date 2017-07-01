@@ -7,18 +7,18 @@ import com.google.gson.JsonObject;
 import me.gerryfletcher.twitter.controllers.security.HTTPRequestUtil;
 import me.gerryfletcher.twitter.controllers.security.JWTSecret;
 import me.gerryfletcher.twitter.exceptions.ApplicationException;
-import me.gerryfletcher.twitter.exceptions.BadDataException;
-import me.gerryfletcher.twitter.exceptions.UserNotExistsException;
-import me.gerryfletcher.twitter.services.UserService;
+import me.gerryfletcher.twitter.models.DisplayName;
+import me.gerryfletcher.twitter.models.Handle;
+import me.gerryfletcher.twitter.services.EditUserService;
 
 import javax.annotation.security.RolesAllowed;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.net.MalformedURLException;
+import java.net.URL;
 
-@Path("user")
+@Path("user/{handle}/edit")
 public class EditUserResource {
 
     private Gson gson = new GsonBuilder()
@@ -35,38 +35,89 @@ public class EditUserResource {
      * @param handle The handle to be edited.
      * @return Response 200 OK if it is fine, or unauthorized.
      */
-    @Path("{handle}/edit")
-    @RolesAllowed("User")
     @GET
+    @RolesAllowed("user")
     public Response verifyUser(@HeaderParam("authorization") String auth, @PathParam("handle") String handle) {
+        if (doesAuthMatchUser(auth, handle)) {
+            return Response.ok().build();
+        }
+        return Response.status(Response.Status.BAD_REQUEST).build();
+    }
 
-        try {
-            UserService userService = UserService.getInstance();
+    @POST
+    @RolesAllowed("user")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response updateUser(@HeaderParam("authorization") String auth, @PathParam("handle") String handle, String requestJson) {
 
-            String token = HTTPRequestUtil.getJWT(auth); // JWT
-            JWTSecret jwtSecret = new JWTSecret();
+        System.out.println("EDIT called with request: " + requestJson);
 
-            int headerUID = jwtSecret.getClaim(token, "uid").asInt(); // User ID
-            String headerHandle = userService.getUserHandle(headerUID);
+        if (!doesAuthMatchUser(auth, handle)) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
 
-            if (!headerHandle.equals(handle)) {
-                JsonObject response = new JsonObject();
-                response.addProperty("handle", handle);
-                return Response
-                        .status(Response.Status.UNAUTHORIZED)
-                        .entity(gson.toJson(response))
-                        .build();
-            } else {
-                return Response.ok().build();
+        String token = HTTPRequestUtil.getJWT(auth);
+        JWTSecret jwt = new JWTSecret();
+
+        int uid = jwt.getClaim(token, "uid").asInt();
+
+        JsonObject request = gson.fromJson(requestJson, JsonObject.class);
+        EditUserService editService = EditUserService.getInstance();
+
+        if (request.has("display_name")) {
+            String displayName = request.get("display_name").getAsString();
+            if (!DisplayName.isDisplayNameValid(displayName)) {
+                return Response.status(Response.Status.BAD_REQUEST).build();
             }
 
-        } catch (UserNotExistsException e) {
-            e.printStackTrace();
-            return Response.status(Response.Status.BAD_REQUEST).build();
-        } catch (ApplicationException e) {
-            e.printStackTrace();
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            try {
+                editService.updateDisplayName(uid, displayName);
+            } catch (ApplicationException e) {
+                e.printStackTrace();
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            }
         }
+
+        if (request.has("profile_picture")) {
+            String profilePicture = request.get("profile_picture").getAsString();
+            URL pictureHref;
+            try {
+                pictureHref = new URL(profilePicture);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+                return Response.status(Response.Status.BAD_REQUEST).build();
+            }
+
+            try {
+                editService.updateProfilePicture(uid, pictureHref);
+            } catch (ApplicationException e) {
+                e.printStackTrace();
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            }
+        }
+
+        if (request.has("bio")) {
+            String bio = request.get("bio").getAsString();
+            try {
+                editService.updateBio(uid, bio);
+            } catch (ApplicationException e) {
+                e.printStackTrace();
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            }
+        }
+
+        return Response.ok().build();
     }
+
+    private boolean doesAuthMatchUser(String auth, String handle) {
+        if (!Handle.isHandleValid(handle)) {
+            return false;
+        }
+
+        String token = HTTPRequestUtil.getJWT(auth);
+        String authHandle = new JWTSecret().getClaim(token, "handle").asString();
+
+        return authHandle.equalsIgnoreCase(handle);
+    }
+
 
 }

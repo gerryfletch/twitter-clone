@@ -77,6 +77,7 @@ public class AuthenticationFilter implements javax.ws.rs.container.ContainerRequ
 
         //If no authorization information present; block access
         if (authorization == null || authorization.isEmpty()) {
+            System.out.println("Auth empty. Access unauthorized.");
             requestContext.abortWith(ACCESS_UNAUTHORIZED);
             return;
         }
@@ -98,6 +99,7 @@ public class AuthenticationFilter implements javax.ws.rs.container.ContainerRequ
         }
 
         if (!authorized) {
+            System.out.println("No authorization. Access unauthorized #2.");
             requestContext.abortWith(ACCESS_UNAUTHORIZED);
         }
     }
@@ -115,6 +117,7 @@ public class AuthenticationFilter implements javax.ws.rs.container.ContainerRequ
         System.out.println("TOKEN: " + token);
 
         if (!jwt.validateToken(token)) {
+            System.out.println("Invalid token.");
             return false;
         }
 
@@ -123,9 +126,14 @@ public class AuthenticationFilter implements javax.ws.rs.container.ContainerRequ
             RolesAllowed rolesAnnotation = this.method.getAnnotation(RolesAllowed.class);
             Set<String> rolesSet = new HashSet<>(Arrays.asList(rolesAnnotation.value()));
             String role = jwt.getClaim(token, "role").asString();
-            if (!rolesSet.contains(role)) {
-                return false;
+
+            for (String aRole : rolesSet) {
+                if (aRole.equalsIgnoreCase(role)) {
+                    return true;
+                }
             }
+
+            return false;
         }
         return true;
     }

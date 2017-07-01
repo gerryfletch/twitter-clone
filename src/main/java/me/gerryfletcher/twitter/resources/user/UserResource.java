@@ -7,7 +7,6 @@ import com.google.gson.JsonObject;
 import me.gerryfletcher.twitter.controllers.security.HTTPRequestUtil;
 import me.gerryfletcher.twitter.controllers.security.JWTSecret;
 import me.gerryfletcher.twitter.exceptions.ApplicationException;
-import me.gerryfletcher.twitter.exceptions.BadDataException;
 import me.gerryfletcher.twitter.exceptions.UserNotExistsException;
 import me.gerryfletcher.twitter.services.RelationshipService;
 import me.gerryfletcher.twitter.services.UserService;
@@ -20,7 +19,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
-@Path("user")
+@Path("user/{handle}")
 public class UserResource {
 
     private Gson gson = new GsonBuilder()
@@ -46,9 +45,8 @@ public class UserResource {
      * @param handle The users handle.
      * @return Response 200 OK with the profile in JSON, 404 not found, or 403 forbidden if there is another error.
      */
-    @Path("{handle}")
-    @RolesAllowed("user")
     @GET
+    @RolesAllowed("User")
     public Response getUserProfile(@HeaderParam("authorization") String auth, @PathParam("handle") String handle) {
 
         try {

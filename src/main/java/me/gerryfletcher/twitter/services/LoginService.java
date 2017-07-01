@@ -12,7 +12,7 @@ public class LoginService {
     private static LoginService instance = null;
     private LoginDao loginDao;
 
-    protected LoginService() {
+    private LoginService() {
         this.loginDao = new LoginDao();
     }
 

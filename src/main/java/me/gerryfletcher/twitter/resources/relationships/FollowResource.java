@@ -16,6 +16,12 @@ import javax.ws.rs.core.Response;
 @Path("/user/{handle}/follow")
 public class FollowResource {
 
+    /**
+     * Attempts to follow a user. It is from the point of view of the client that sends the request.
+     * @param auth  The Authrorization header.
+     * @param handleToFollow    The handle to try to follow.
+     * @return  200 OK, 400 Bad Request, 500 Server Error.
+     */
     @POST
     public Response followUser(@HeaderParam("authorization") String auth, @PathParam("handle") String handleToFollow) {
 
@@ -48,6 +54,7 @@ public class FollowResource {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
+        System.out.println("User followed.");
         return Response.ok().build();
     }
 

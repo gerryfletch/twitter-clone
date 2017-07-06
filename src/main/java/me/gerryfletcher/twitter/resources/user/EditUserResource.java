@@ -38,6 +38,7 @@ public class EditUserResource {
     @GET
     @RolesAllowed("user")
     public Response verifyUser(@HeaderParam("authorization") String auth, @PathParam("handle") String handle) {
+        System.out.println("Verify user called.");
         if (doesAuthMatchUser(auth, handle)) {
             return Response.ok().build();
         }

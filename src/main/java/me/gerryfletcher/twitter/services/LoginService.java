@@ -1,6 +1,6 @@
 package me.gerryfletcher.twitter.services;
 
-import me.gerryfletcher.twitter.DAO.LoginDao;
+import me.gerryfletcher.twitter.DAO.account.LoginDao;
 import me.gerryfletcher.twitter.exceptions.ApplicationException;
 import me.gerryfletcher.twitter.exceptions.BadDataException;
 import me.gerryfletcher.twitter.exceptions.UserNotExistsException;

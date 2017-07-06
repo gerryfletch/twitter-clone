@@ -2,7 +2,7 @@ package me.gerryfletcher.twitter.services;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import me.gerryfletcher.twitter.DAO.UserDao;
+import me.gerryfletcher.twitter.DAO.profile.UserDao;
 import me.gerryfletcher.twitter.exceptions.ApplicationException;
 import me.gerryfletcher.twitter.exceptions.UserNotExistsException;
 import me.gerryfletcher.twitter.models.User;

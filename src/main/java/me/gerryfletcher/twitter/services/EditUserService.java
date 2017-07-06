@@ -1,6 +1,6 @@
 package me.gerryfletcher.twitter.services;
 
-import me.gerryfletcher.twitter.DAO.EditUserDao;
+import me.gerryfletcher.twitter.DAO.profile.EditUserDao;
 import me.gerryfletcher.twitter.exceptions.ApplicationException;
 
 import java.net.URL;

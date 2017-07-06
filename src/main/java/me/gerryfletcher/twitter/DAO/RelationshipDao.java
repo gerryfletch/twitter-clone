@@ -58,7 +58,7 @@ public class RelationshipDao extends UtilDao {
 
     }
 
-    private final String SET_FOLLOWING_QUERY = "INSERT INTO followers(follower_id, following_id) VALUES(?,?)";
+    private final String SET_FOLLOWING_QUERY = "INSERT INTO followers(follower_id, following_id, creation_date) VALUES(?,?, DATETIME('now', 'localtime'))";
 
     public void setFollowing(int userId, int idToFollow) throws SQLException {
         try(Connection connection = getConnection();

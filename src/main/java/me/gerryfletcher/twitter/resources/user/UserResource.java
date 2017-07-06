@@ -48,7 +48,6 @@ public class UserResource {
     @GET
     @RolesAllowed("User")
     public Response getUserProfile(@HeaderParam("authorization") String auth, @PathParam("handle") String handle) {
-
         try {
             if (!UserService.getInstance().doesHandleExist(handle)) {
                 return Response.status(Response.Status.NOT_FOUND).build();
@@ -59,6 +58,7 @@ public class UserResource {
 
         JWTSecret jwt = new JWTSecret();
         int requestId = jwt.getClaim(HTTPRequestUtil.getJWT(auth), "uid").asInt();
+        String requestHandle = jwt.getClaim(HTTPRequestUtil.getJWT(auth), "handle").asString();
 
         try {
             UserService us = UserService.getInstance();
@@ -68,6 +68,10 @@ public class UserResource {
             RelationshipService rs = RelationshipService.getInstance();
             JsonObject relationship = rs.getRelationshipJson(requestId, userId);
             profile.add("relationship", relationship);
+
+            profile.addProperty("self", requestHandle.equalsIgnoreCase(handle));
+
+            System.out.println(profile);
 
             return Response.ok().entity(gson.toJson(profile)).build();
         } catch (UserNotExistsException e) {

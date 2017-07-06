@@ -16,7 +16,7 @@ public abstract class UtilDao {
 
     private HikariDataSource dataSource;
 
-    UtilDao() {
+    protected UtilDao() {
         this.dataSource = DBHandler.getDataSource();
     }
 
@@ -38,7 +38,7 @@ public abstract class UtilDao {
      * @return The number of rows.
      * @throws SQLException In DB failiure.
      */
-    protected int selectCountByIdentifier(String table, String column, int identifier) throws SQLException {
+    public int selectCountByIdentifier(String table, String column, int identifier) throws SQLException {
         String query = "SELECT COUNT(*) FROM " + table + " WHERE " + column + "=?";
         try (Connection connection = getConnection();
              PreparedStatement stmt = connection.prepareStatement(query)) {
@@ -62,7 +62,7 @@ public abstract class UtilDao {
      * @return True/False if the record exists.
      * @throws SQLException In DB failiure.
      */
-    protected boolean doesRecordExist(String table, String column, int identifier) throws SQLException {
+    public boolean doesRecordExist(String table, String column, int identifier) throws SQLException {
         String query = "SELECT EXISTS(SELECT 1 FROM " + table + " WHERE " + column + "=? LIMIT 1)";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement stmt = connection.prepareStatement(query)) {
@@ -86,7 +86,7 @@ public abstract class UtilDao {
      * @return In DB failiure.
      * @throws SQLException
      */
-    protected boolean doesRecordExist(String table, String column, String identifier) throws SQLException {
+    public boolean doesRecordExist(String table, String column, String identifier) throws SQLException {
         String query = "SELECT EXISTS(SELECT 1 FROM " + table + " WHERE lower(" + column + ")=? LIMIT 1)";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement stmt = connection.prepareStatement(query)) {

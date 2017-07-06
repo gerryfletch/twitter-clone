@@ -1,5 +1,6 @@
-package me.gerryfletcher.twitter.DAO;
+package me.gerryfletcher.twitter.DAO.account;
 
+import me.gerryfletcher.twitter.DAO.UtilDao;
 import me.gerryfletcher.twitter.controllers.security.JWTSecret;
 import me.gerryfletcher.twitter.exceptions.BadDataException;
 import me.gerryfletcher.twitter.exceptions.UserNotExistsException;

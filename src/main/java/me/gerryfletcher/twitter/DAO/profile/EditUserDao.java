@@ -1,4 +1,6 @@
-package me.gerryfletcher.twitter.DAO;
+package me.gerryfletcher.twitter.DAO.profile;
+
+import me.gerryfletcher.twitter.DAO.UtilDao;
 
 import java.net.URL;
 import java.sql.Connection;

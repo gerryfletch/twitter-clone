@@ -57,6 +57,11 @@
             <artifactId>HikariCP</artifactId>
             <version>2.6.2</version>
         </dependency>
+        <dependency>
+            <groupId>org.hashids</groupId>
+            <artifactId>hashids</artifactId>
+            <version>1.0.2</version>
+        </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.springframework.security/spring-security-core -->
         <dependency>

@@ -51,6 +51,7 @@ public class UnfollowResource {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
+        System.out.println("User unfollowed.");
         return Response.ok().build();
     }
 

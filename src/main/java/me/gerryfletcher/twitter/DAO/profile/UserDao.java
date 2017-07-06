@@ -1,6 +1,7 @@
-package me.gerryfletcher.twitter.DAO;
+package me.gerryfletcher.twitter.DAO.profile;
 
 import com.google.gson.JsonObject;
+import me.gerryfletcher.twitter.DAO.UtilDao;
 import me.gerryfletcher.twitter.exceptions.UserNotExistsException;
 
 import java.sql.Connection;

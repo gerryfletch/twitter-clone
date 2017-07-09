@@ -4,10 +4,15 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import me.gerryfletcher.twitter.controllers.security.HTTPRequestUtil;
+import me.gerryfletcher.twitter.controllers.security.JWTSecret;
+import me.gerryfletcher.twitter.exceptions.ApplicationException;
+import me.gerryfletcher.twitter.exceptions.UserNotExistsException;
+import me.gerryfletcher.twitter.models.Tweet;
+import me.gerryfletcher.twitter.services.tweets.TweetService;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
+import javax.annotation.security.RolesAllowed;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -42,12 +47,33 @@ public class NewTweetResource {
     @Path("/new")
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response newTweet(String json) {
-
+    @RolesAllowed("user")
+    public Response newTweet(@HeaderParam("authorization") String auth, String json) {
         JsonObject request = gson.fromJson(json, JsonObject.class);
+        String body = request.get("body").getAsString();
 
+        if (!Tweet.isTweetValid(body)) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
 
+        String token = HTTPRequestUtil.getJWT(auth);
+        JWTSecret jwtSecret = new JWTSecret();
 
-        return Response.ok().build();
+        int uid = jwtSecret.getClaim(token, "uid").asInt();
+
+        TweetService tweetService = TweetService.getInstance();
+        try {
+            String tweetHash = tweetService.postTweet(body, uid);
+            JsonObject newTweet = tweetService.getTweet(tweetHash);
+            System.out.println(newTweet);
+            return Response.ok().entity(gson.toJson(newTweet)).build();
+
+        } catch (ApplicationException e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        } catch (UserNotExistsException e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
     }
 }

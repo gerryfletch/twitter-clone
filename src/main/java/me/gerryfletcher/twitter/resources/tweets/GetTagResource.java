@@ -7,7 +7,7 @@ import com.google.gson.JsonObject;
 import me.gerryfletcher.twitter.controllers.security.HTTPRequestUtil;
 import me.gerryfletcher.twitter.controllers.security.JWTSecret;
 import me.gerryfletcher.twitter.exceptions.ApplicationException;
-import me.gerryfletcher.twitter.services.GetTagService;
+import me.gerryfletcher.twitter.services.tweets.GetTagService;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.HeaderParam;

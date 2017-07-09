@@ -9,7 +9,7 @@ import me.gerryfletcher.twitter.exceptions.BadDataException;
 import me.gerryfletcher.twitter.exceptions.UserNotExistsException;
 import me.gerryfletcher.twitter.models.Handle;
 import me.gerryfletcher.twitter.models.Password;
-import me.gerryfletcher.twitter.services.LoginService;
+import me.gerryfletcher.twitter.services.account.LoginService;
 import me.gerryfletcher.twitter.utilities.ResourceUtils;
 
 import javax.annotation.security.PermitAll;

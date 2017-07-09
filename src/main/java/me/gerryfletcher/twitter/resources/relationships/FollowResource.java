@@ -6,7 +6,7 @@ import me.gerryfletcher.twitter.exceptions.ApplicationException;
 import me.gerryfletcher.twitter.exceptions.UserNotExistsException;
 import me.gerryfletcher.twitter.models.Handle;
 import me.gerryfletcher.twitter.models.RelationshipType;
-import me.gerryfletcher.twitter.services.RelationshipService;
+import me.gerryfletcher.twitter.services.user.RelationshipService;
 import me.gerryfletcher.twitter.utilities.ResourceUtils;
 
 import javax.ws.rs.*;

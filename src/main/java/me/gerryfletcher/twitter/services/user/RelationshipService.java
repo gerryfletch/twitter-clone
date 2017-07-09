@@ -1,4 +1,4 @@
-package me.gerryfletcher.twitter.services;
+package me.gerryfletcher.twitter.services.user;
 
 import com.google.gson.JsonObject;
 import me.gerryfletcher.twitter.DAO.RelationshipDao;

@@ -1,4 +1,4 @@
-package me.gerryfletcher.twitter.services;
+package me.gerryfletcher.twitter.services.user;
 
 import me.gerryfletcher.twitter.DAO.profile.EditUserDao;
 import me.gerryfletcher.twitter.exceptions.ApplicationException;

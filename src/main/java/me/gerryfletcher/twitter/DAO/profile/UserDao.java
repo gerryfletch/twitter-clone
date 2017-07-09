@@ -12,6 +12,7 @@ import java.sql.SQLException;
 public class UserDao extends UtilDao {
 
     private final String GET_HANDLE_QUERY = "SELECT handle FROM users WHERE id=?";
+    private final String GET_DISPLAY_NAME_QUERY = "SELECT display_name FROM users WHERE id=?";
     private final String GET_UID_QUERY = "SELECT id FROM users WHERE handle=?";
     private final String GET_PROFILE_QUERY = "SELECT handle, display_name, profile_picture, bio\n" +
             "FROM users\n" +
@@ -42,6 +43,22 @@ public class UserDao extends UtilDao {
             }
 
             return result.getString(1);
+        }
+    }
+
+    public String getDisplayName(int uid) throws UserNotExistsException, SQLException {
+        try(Connection connection = getConnection();
+            PreparedStatement stmt = connection.prepareStatement(GET_DISPLAY_NAME_QUERY)) {
+
+            stmt.setInt(1, uid);
+            ResultSet rs = stmt.executeQuery();
+
+            if (! rs.next()) {
+                throw new UserNotExistsException();
+            }
+
+            return rs.getString(1);
+
         }
     }
 

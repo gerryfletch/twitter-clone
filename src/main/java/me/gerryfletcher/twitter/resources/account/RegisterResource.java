@@ -11,7 +11,7 @@ import me.gerryfletcher.twitter.models.DisplayName;
 import me.gerryfletcher.twitter.models.Email;
 import me.gerryfletcher.twitter.models.Handle;
 import me.gerryfletcher.twitter.models.Password;
-import me.gerryfletcher.twitter.services.RegisterService;
+import me.gerryfletcher.twitter.services.account.RegisterService;
 import me.gerryfletcher.twitter.utilities.ResourceUtils;
 
 import javax.annotation.security.PermitAll;

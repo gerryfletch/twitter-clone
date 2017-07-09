@@ -1,4 +1,4 @@
-package me.gerryfletcher.twitter.services;
+package me.gerryfletcher.twitter.services.tweets;
 
 import com.google.gson.JsonObject;
 import me.gerryfletcher.twitter.DAO.tweets.GetTagDao;

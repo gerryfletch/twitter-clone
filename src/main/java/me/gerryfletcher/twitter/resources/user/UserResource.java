@@ -8,8 +8,8 @@ import me.gerryfletcher.twitter.controllers.security.HTTPRequestUtil;
 import me.gerryfletcher.twitter.controllers.security.JWTSecret;
 import me.gerryfletcher.twitter.exceptions.ApplicationException;
 import me.gerryfletcher.twitter.exceptions.UserNotExistsException;
-import me.gerryfletcher.twitter.services.RelationshipService;
-import me.gerryfletcher.twitter.services.UserService;
+import me.gerryfletcher.twitter.services.user.RelationshipService;
+import me.gerryfletcher.twitter.services.user.UserService;
 import me.gerryfletcher.twitter.utilities.ResourceUtils;
 
 import javax.annotation.security.RolesAllowed;

@@ -9,7 +9,7 @@ import me.gerryfletcher.twitter.controllers.security.JWTSecret;
 import me.gerryfletcher.twitter.exceptions.ApplicationException;
 import me.gerryfletcher.twitter.models.DisplayName;
 import me.gerryfletcher.twitter.models.Handle;
-import me.gerryfletcher.twitter.services.EditUserService;
+import me.gerryfletcher.twitter.services.user.EditUserService;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;

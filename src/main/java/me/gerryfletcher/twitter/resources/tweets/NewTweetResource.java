@@ -42,7 +42,7 @@ public class NewTweetResource {
      *      - display name
      *      - handle
      * @param json  The request
-     * @return  The created tweet
+     * @return  The created tweet relative to hash ID.
      */
     @Path("/new")
     @POST

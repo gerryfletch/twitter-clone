@@ -53,7 +53,7 @@ public class TweetService {
         try {
             long tweetId = hashId.decode(tweetHash)[0];
             JsonObject tweet = tweetDao.getTweet(tweetId);
-            JsonArray entities = getEntities(tweet.get("body").getAsString());
+            JsonObject entities = getEntities(tweet.get("body").getAsString());
             tweet.add("entities", entities);
             return tweet;
         } catch (SQLException e) {
@@ -63,16 +63,29 @@ public class TweetService {
     }
 
     /**
+     * Returns tweets from followed and self ordered by datetime.
+     * @param userid
+     * @param count
+     * @return
+     */
+    public JsonObject getTweets(int userid, int count) {
+
+        return new JsonObject();
+    }
+
+    /**
      * Gets the entities. Hash tags and user mentions.
      * @param tweet The tweet body.
      * @return  A JsonObject containing the entities.
      * @throws ApplicationException In DB failiure.
      */
-    private JsonArray getEntities(String tweet) throws ApplicationException {
+    private JsonObject getEntities(String tweet) throws ApplicationException {
+        JsonObject entities = new JsonObject();
+        JsonArray userEntities = new JsonArray();
+
+        // The User Mentions
         Pattern pattern = Pattern.compile("@([A-Za-z1-9_\\-]+)");
         Matcher matcher = pattern.matcher(tweet);
-
-        JsonArray entities = new JsonArray();
 
         while (matcher.find()) {
             String handle = matcher.group(1);
@@ -91,8 +104,35 @@ public class TweetService {
             indices.add(end);
 
             user.add("indices", indices);
-            entities.add(user);
+            userEntities.add(user);
         }
+
+        entities.add("user_mentions", userEntities);
+
+        // And now, the Hash Tags
+        Pattern hashTagPattern = Pattern.compile("#([A-Za-z1-9]+)");
+        matcher = hashTagPattern.matcher(tweet);
+
+        JsonArray hashTagEntities = new JsonArray();
+
+        while(matcher.find()) {
+            String tag = matcher.group(1);
+            int start = matcher.start(1);
+            int end = matcher.end(1);
+
+            JsonObject hashtag = new JsonObject();
+            hashtag.addProperty("tag", tag);
+
+            JsonArray indices = new JsonArray();
+            indices.add(start);
+            indices.add(end);
+
+            hashtag.add("indices", indices);
+            hashTagEntities.add(hashtag);
+        }
+
+        entities.add("hashtags", hashTagEntities);
+
 
         System.out.println(entities);
 

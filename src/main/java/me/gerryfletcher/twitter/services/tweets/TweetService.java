@@ -9,6 +9,7 @@ import me.gerryfletcher.twitter.exceptions.UserNotExistsException;
 import me.gerryfletcher.twitter.services.user.UserService;
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -49,12 +50,32 @@ public class TweetService {
         }
     }
 
+    public JsonArray getUserFeed(int uid, int numOfTweets, int fromRow) throws ApplicationException {
+        JsonArray response = new JsonArray();
+
+        try {
+            List<JsonObject> tweets = tweetDao.getUserFeed(uid, numOfTweets, fromRow);
+            for (JsonObject tweet: tweets) {
+                JsonObject entities = getEntities(tweet.get("body").getAsString());
+                tweet.add("entities", entities);
+
+                response.add(tweet);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new ApplicationException("Problem getting Feed in TweetDao", e);
+        }
+
+        return response;
+    }
+
     public JsonObject getTweet(String tweetHash) throws UserNotExistsException, ApplicationException {
         try {
             long tweetId = hashId.decode(tweetHash)[0];
             JsonObject tweet = tweetDao.getTweet(tweetId);
             JsonObject entities = getEntities(tweet.get("body").getAsString());
             tweet.add("entities", entities);
+            tweet.addProperty("hash_id", tweetHash);
             return tweet;
         } catch (SQLException e) {
             e.printStackTrace();

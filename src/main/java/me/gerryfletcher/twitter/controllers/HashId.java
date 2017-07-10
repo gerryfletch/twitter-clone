@@ -5,6 +5,6 @@ import org.hashids.Hashids;
 
 public class HashId extends Hashids {
     public HashId() {
-        super("AHSDGASDohiasihdHASHR12317@");
+        super("AHSDGASDohiasihdHASHR12317@", 8);
     }
 }

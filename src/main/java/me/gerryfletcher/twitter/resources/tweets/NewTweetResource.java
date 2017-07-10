@@ -44,7 +44,6 @@ public class NewTweetResource {
      * @param json  The request
      * @return  The created tweet relative to hash ID.
      */
-    @Path("/new")
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @RolesAllowed("user")

@@ -16,7 +16,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-@Path("/tweet")
+@Path("/tweet/tags")
 public class GetTagResource {
 
     private Gson gson = new GsonBuilder()
@@ -25,7 +25,6 @@ public class GetTagResource {
             .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
             .create();
 
-    @Path("/get/tags")
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public Response getTags(@HeaderParam("authorization") String auth, String json) {

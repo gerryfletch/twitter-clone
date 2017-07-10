@@ -19,7 +19,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
-@Path("user/{handle}")
+@Path("profile/{handle}")
 public class UserResource {
 
     private Gson gson = new GsonBuilder()

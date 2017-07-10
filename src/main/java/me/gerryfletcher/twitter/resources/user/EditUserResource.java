@@ -18,7 +18,7 @@ import javax.ws.rs.core.Response;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-@Path("user/{handle}/edit")
+@Path("profile/{handle}")
 public class EditUserResource {
 
     private Gson gson = new GsonBuilder()
@@ -27,25 +27,7 @@ public class EditUserResource {
             .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
             .create();
 
-    /**
-     * This initial GET checks if the user who sent the request
-     * is the same as the path handle.
-     *
-     * @param auth   The JWT Bearer authentication sent in the HTTP request.
-     * @param handle The handle to be edited.
-     * @return Response 200 OK if it is fine, or unauthorized.
-     */
-    @GET
-    @RolesAllowed("user")
-    public Response verifyUser(@HeaderParam("authorization") String auth, @PathParam("handle") String handle) {
-        System.out.println("Verify user called.");
-        if (doesAuthMatchUser(auth, handle)) {
-            return Response.ok().build();
-        }
-        return Response.status(Response.Status.BAD_REQUEST).build();
-    }
-
-    @POST
+    @PUT
     @RolesAllowed("user")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response updateUser(@HeaderParam("authorization") String auth, @PathParam("handle") String handle, String requestJson) {

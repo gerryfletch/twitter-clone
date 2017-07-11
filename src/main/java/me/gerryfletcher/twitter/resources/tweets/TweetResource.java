@@ -11,19 +11,38 @@ import me.gerryfletcher.twitter.exceptions.UserNotExistsException;
 import me.gerryfletcher.twitter.models.Tweet;
 import me.gerryfletcher.twitter.services.tweets.TweetService;
 
+import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 @Path("/tweet")
-public class NewTweetResource {
+public class TweetResource {
 
     private Gson gson = new GsonBuilder()
             .setPrettyPrinting()
             .serializeNulls()
             .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
             .create();
+
+    @GET
+    @Path("{hashid}")
+    @PermitAll
+    public Response getTweet(@PathParam("hashid") String hashid) {
+        TweetService tweetService = TweetService.getInstance();
+
+        try {
+            JsonObject tweet = tweetService.getTweet(hashid);
+            return Response.ok().entity(gson.toJson(tweet)).build();
+        } catch (UserNotExistsException e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        } catch (ApplicationException e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 
     /**
      * Each tweet request has:

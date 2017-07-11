@@ -17,7 +17,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 @Path("/tweet/tags")
-public class GetTagResource {
+public class TweetTagResource {
 
     private Gson gson = new GsonBuilder()
             .setPrettyPrinting()

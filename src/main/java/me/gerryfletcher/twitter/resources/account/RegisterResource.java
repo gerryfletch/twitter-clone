@@ -43,6 +43,7 @@ public class RegisterResource {
     @PermitAll
     public Response registerUser(String json) {
         System.out.println(json);
+        System.out.println("el o el");
         JsonObject request = gson.fromJson(json, JsonObject.class);
 
         String handle = request.get("handle").getAsString();
@@ -75,11 +76,14 @@ public class RegisterResource {
             returnSuccess.addProperty("authenticated", true);
             returnSuccess.addProperty("token", token);
 
+            System.out.println("Registered user " + handle);
             return Response.ok().entity(gson.toJson(returnSuccess)).build();
 
         } catch (BadDataException | UserExistsException e) {
+            e.printStackTrace();
             return ResourceUtils.unauthorized(e.getMessage(), Response.Status.BAD_REQUEST);
         } catch (ApplicationException e) {
+            e.printStackTrace();
             return ResourceUtils.unauthorized("Something went wrong on our end.", Response.Status.INTERNAL_SERVER_ERROR);
         }
     }

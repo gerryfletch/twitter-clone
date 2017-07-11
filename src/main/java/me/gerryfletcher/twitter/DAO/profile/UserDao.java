@@ -132,7 +132,7 @@ public class UserDao extends UtilDao {
     public JsonObject getStatistics(int uid) throws SQLException {
         JsonObject statistics = new JsonObject();
 
-        statistics.addProperty("number_of_tweets", selectCountByIdentifier("tweets", "id", uid));
+        statistics.addProperty("number_of_tweets", selectCountByIdentifier("tweets", "author_id", uid));
         statistics.addProperty("number_of_followers", selectCountByIdentifier("followers", "following_id", uid));
         statistics.addProperty("number_of_following", selectCountByIdentifier("followers", "follower_id", uid));
 

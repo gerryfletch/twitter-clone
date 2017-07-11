@@ -51,21 +51,33 @@ public class TweetService {
     }
 
     public JsonArray getUserFeed(int uid, int numOfTweets, int fromRow) throws ApplicationException {
-        JsonArray response = new JsonArray();
-
         try {
             List<JsonObject> tweets = tweetDao.getUserFeed(uid, numOfTweets, fromRow);
-            for (JsonObject tweet: tweets) {
-                JsonObject entities = getEntities(tweet.get("body").getAsString());
-                tweet.add("entities", entities);
+            return buildResponse(tweets);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new ApplicationException("Problem getting Feed in TweetDao", e);
+        }
+    }
 
-                response.add(tweet);
-            }
+    public JsonArray getUserFeed(String handle, int numOfTweets, int fromRow) throws ApplicationException {
+        try {
+            List<JsonObject> tweets = tweetDao.getUserFeed(handle, numOfTweets, fromRow);
+            return buildResponse(tweets);
         } catch (SQLException e) {
             e.printStackTrace();
             throw new ApplicationException("Problem getting Feed in TweetDao", e);
         }
 
+    }
+
+    private JsonArray buildResponse(List<JsonObject> tweets) throws ApplicationException {
+        JsonArray response = new JsonArray();
+        for (JsonObject tweet: tweets) {
+            JsonObject entities = getEntities(tweet.get("body").getAsString());
+            tweet.add("entities", entities);
+            response.add(tweet);
+        }
         return response;
     }
 
@@ -83,16 +95,6 @@ public class TweetService {
         }
     }
 
-    /**
-     * Returns tweets from followed and self ordered by datetime.
-     * @param userid
-     * @param count
-     * @return
-     */
-    public JsonObject getTweets(int userid, int count) {
-
-        return new JsonObject();
-    }
 
     /**
      * Gets the entities. Hash tags and user mentions.
@@ -153,10 +155,6 @@ public class TweetService {
         }
 
         entities.add("hashtags", hashTagEntities);
-
-
-        System.out.println(entities);
-
         return entities;
     }
 

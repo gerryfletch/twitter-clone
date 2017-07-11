@@ -50,8 +50,9 @@ public class TweetDao extends UtilDao {
             "ON users.id = tweets.author_id\n" +
             "LEFT JOIN account_details\n" +
             "ON account_details.id = tweets.author_id\n" +
-            "WHERE followers.follower_id = ?\n" +
-            "ORDER BY datetime(tweets.creation_date)" +
+            "WHERE followers.follower_id = ? \n" +
+            "OR tweets.author_id = ? \n" +
+            "ORDER BY datetime(tweets.creation_date) DESC \n" +
             "LIMIT ? OFFSET ?";
 
     /**
@@ -69,32 +70,64 @@ public class TweetDao extends UtilDao {
             PreparedStatement stmt = conn.prepareStatement(GET_TWEETS_FOR_USER_QUERY)) {
 
             stmt.setInt(1, uid);
+            stmt.setInt(2, uid);
+            stmt.setInt(3, numOfTweets);
+            stmt.setInt(4, fromRow);
+
+            ResultSet rs = stmt.executeQuery();
+            HashId hashId = new HashId();
+
+            return getTweetsFromResultSet(rs, hashId);
+        }
+    }
+
+    private final String GET_TWEETS_FOR_PROFILE_QUERY = "SELECT tweets.id, tweets.author_id, tweets.body, tweets.creation_date, users.display_name, users.handle, account_details.profile_picture\n" +
+            "FROM tweets\n" +
+            "INNER JOIN users\n" +
+            "ON users.id = tweets.author_id\n" +
+            "LEFT JOIN account_details\n" +
+            "ON account_details.id = tweets.author_id\n" +
+            "WHERE users.handle = ?\n" +
+            "ORDER BY datetime(tweets.creation_date) DESC \n" +
+            "LIMIT ? OFFSET ?";
+
+    public List<JsonObject> getUserFeed(String handle, int numOfTweets, int fromRow) throws SQLException {
+        System.out.println("new method called");
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(GET_TWEETS_FOR_PROFILE_QUERY)) {
+
+            stmt.setString(1, handle);
             stmt.setInt(2, numOfTweets);
             stmt.setInt(3, fromRow);
 
             ResultSet rs = stmt.executeQuery();
             HashId hashId = new HashId();
 
-            while(rs.next()) {
-                JsonObject tweet = new JsonObject();
-                tweet.addProperty("tweet_id", rs.getString("id"));
-                tweet.addProperty("author_id", rs.getString("author_id"));
-                tweet.addProperty("body", rs.getString("body"));
-                tweet.addProperty("timestamp", rs.getString("creation_date"));
+            return getTweetsFromResultSet(rs, hashId);
+        }
+    }
 
-                String hashid = hashId.encode(rs.getLong("id"));
-                tweet.addProperty("hash_id", hashid);
+    private List<JsonObject> getTweetsFromResultSet(ResultSet rs, HashId hashId) throws SQLException {
+        List<JsonObject> tweets = new ArrayList<>();
 
-                JsonObject profile = new JsonObject();
-                profile.addProperty("display_name", rs.getString("display_name"));
-                profile.addProperty("handle", rs.getString("handle"));
-                profile.addProperty("profile_picture", rs.getString("profile_picture"));
+        while(rs.next()) {
+            JsonObject tweet = new JsonObject();
+            tweet.addProperty("tweet_id", rs.getString("id"));
+            tweet.addProperty("author_id", rs.getString("author_id"));
+            tweet.addProperty("body", rs.getString("body"));
+            tweet.addProperty("timestamp", rs.getString("creation_date"));
 
-                tweet.add("profile", profile);
+            String hashid = hashId.encode(rs.getLong("id"));
+            tweet.addProperty("hash_id", hashid);
 
-                tweets.add(tweet);
-            }
+            JsonObject profile = new JsonObject();
+            profile.addProperty("display_name", rs.getString("display_name"));
+            profile.addProperty("handle", rs.getString("handle"));
+            profile.addProperty("profile_picture", rs.getString("profile_picture"));
 
+            tweet.add("profile", profile);
+
+            tweets.add(tweet);
         }
 
         return tweets;

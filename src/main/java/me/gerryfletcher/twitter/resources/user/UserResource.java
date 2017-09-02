@@ -67,11 +67,9 @@ public class UserResource {
 
             RelationshipService rs = RelationshipService.getInstance();
             JsonObject relationship = rs.getRelationshipJson(requestId, userId);
+
             profile.add("relationship", relationship);
-
             profile.addProperty("self", requestHandle.equalsIgnoreCase(handle));
-
-            System.out.println(profile);
 
             return Response.ok().entity(gson.toJson(profile)).build();
         } catch (UserNotExistsException e) {

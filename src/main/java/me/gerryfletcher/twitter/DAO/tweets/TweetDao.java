@@ -1,6 +1,5 @@
 package me.gerryfletcher.twitter.DAO.tweets;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import me.gerryfletcher.twitter.DAO.UtilDao;
 import me.gerryfletcher.twitter.DAO.profile.UserDao;
@@ -17,9 +16,11 @@ import java.util.List;
 public class TweetDao extends UtilDao {
 
     private UserDao userDao;
+    private LikeDao likeDao;
 
     public TweetDao() {
         userDao = new UserDao();
+        likeDao = new LikeDao();
     }
 
     private final String POST_TWEET_QUERY = "INSERT INTO tweets(author_id, body, creation_date) VALUES (?,?,DATETIME('now', 'localtime'))";
@@ -57,17 +58,18 @@ public class TweetDao extends UtilDao {
 
     /**
      * Gets tweets from users someone follows, including themself.
-     * @param uid   The users ID.
-     * @param numOfTweets   The number of tweets to select. Typically 10.
-     * @param fromRow   How far into the table to skip rows.
-     * @return  A list of tweets in JSON format.
+     *
+     * @param uid         The users ID.
+     * @param numOfTweets The number of tweets to select. Typically 10.
+     * @param fromRow     How far into the table to skip rows.
+     * @return A list of tweets in JSON format.
      */
     public List<JsonObject> getUserFeed(int uid, int numOfTweets, int fromRow) throws SQLException {
 
         List<JsonObject> tweets = new ArrayList<>();
 
         try (Connection conn = getConnection();
-            PreparedStatement stmt = conn.prepareStatement(GET_TWEETS_FOR_USER_QUERY)) {
+             PreparedStatement stmt = conn.prepareStatement(GET_TWEETS_FOR_USER_QUERY)) {
 
             stmt.setInt(1, uid);
             stmt.setInt(2, uid);
@@ -77,7 +79,7 @@ public class TweetDao extends UtilDao {
             ResultSet rs = stmt.executeQuery();
             HashId hashId = new HashId();
 
-            return getTweetsFromResultSet(rs, hashId);
+            return getTweetsFromResultSet(rs, hashId, uid);
         }
     }
 
@@ -91,8 +93,7 @@ public class TweetDao extends UtilDao {
             "ORDER BY datetime(tweets.creation_date) DESC \n" +
             "LIMIT ? OFFSET ?";
 
-    public List<JsonObject> getUserFeed(String handle, int numOfTweets, int fromRow) throws SQLException {
-        System.out.println("new method called");
+    public List<JsonObject> getUserProfile(int callerId, String handle, int numOfTweets, int fromRow) throws SQLException {
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(GET_TWEETS_FOR_PROFILE_QUERY)) {
 
@@ -103,21 +104,34 @@ public class TweetDao extends UtilDao {
             ResultSet rs = stmt.executeQuery();
             HashId hashId = new HashId();
 
-            return getTweetsFromResultSet(rs, hashId);
+            return getTweetsFromResultSet(rs, hashId, callerId);
         }
     }
 
-    private List<JsonObject> getTweetsFromResultSet(ResultSet rs, HashId hashId) throws SQLException {
+    private List<JsonObject> getTweetsFromResultSet(ResultSet rs, HashId hashId, int callerId) throws SQLException {
         List<JsonObject> tweets = new ArrayList<>();
 
-        while(rs.next()) {
+        while (rs.next()) {
             JsonObject tweet = new JsonObject();
-            tweet.addProperty("tweet_id", rs.getString("id"));
-            tweet.addProperty("author_id", rs.getString("author_id"));
+
+            tweet.addProperty("temp_caller_id", callerId);
+            tweet.addProperty("tweet_id", rs.getInt("id"));
+
+            int authorID = rs.getInt("author_id");
+            int tweetID = rs.getInt("id");
+
+            tweet.addProperty("author_id", authorID);
             tweet.addProperty("body", rs.getString("body"));
             tweet.addProperty("timestamp", rs.getString("creation_date"));
 
-            String hashid = hashId.encode(rs.getLong("id"));
+            boolean isLiked = this.likeDao.isTweetLiked(callerId, tweetID);
+            tweet.addProperty("liked", isLiked);
+
+            int numOfLikes = this.likeDao.getNumberOfLikes(tweetID);
+            tweet.addProperty("like_count", numOfLikes);
+
+
+            String hashid = hashId.encode(tweetID);
             tweet.addProperty("hash_id", hashid);
 
             JsonObject profile = new JsonObject();
@@ -137,19 +151,20 @@ public class TweetDao extends UtilDao {
 
     /**
      * Gets a tweets DB info.
-     * @param tweetId   The numerical ID of the tweet.
-     * @return  The tweets information.
+     *
+     * @param tweetId The numerical ID of the tweet.
+     * @return The tweets information.
      * @throws SQLException In DB failiure.
      */
     public JsonObject getTweet(long tweetId) throws SQLException, UserNotExistsException {
-        try(Connection conn = getConnection();
-            PreparedStatement stmt = conn.prepareStatement(GET_TWEET_QUERY)) {
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(GET_TWEET_QUERY)) {
 
             stmt.setLong(1, tweetId);
 
             ResultSet rs = stmt.executeQuery();
 
-            if (! rs.next()) {
+            if (!rs.next()) {
                 return null;
             }
 

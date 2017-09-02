@@ -60,15 +60,14 @@ public class TweetService {
         }
     }
 
-    public JsonArray getUserFeed(String handle, int numOfTweets, int fromRow) throws ApplicationException {
+    public JsonArray getUserProfile(int uid, String handle, int numOfTweets, int fromRow) throws ApplicationException {
         try {
-            List<JsonObject> tweets = tweetDao.getUserFeed(handle, numOfTweets, fromRow);
+            List<JsonObject> tweets = tweetDao.getUserProfile(uid, handle, numOfTweets, fromRow);
             return buildResponse(tweets);
         } catch (SQLException e) {
             e.printStackTrace();
             throw new ApplicationException("Problem getting Feed in TweetDao", e);
         }
-
     }
 
     private JsonArray buildResponse(List<JsonObject> tweets) throws ApplicationException {

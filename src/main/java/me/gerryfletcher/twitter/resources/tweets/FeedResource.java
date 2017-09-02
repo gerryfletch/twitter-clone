@@ -40,8 +40,6 @@ public class FeedResource {
         JWTSecret jwt = new JWTSecret();
         int uid = jwt.getClaim(token, "uid").asInt();
 
-        System.out.println("Getting " + limit + " posts on page " + page);
-
         if (page == null) {
             page = 0;
         }
@@ -60,8 +58,8 @@ public class FeedResource {
 
             if (handle == null) {
                 tweets = tweetService.getUserFeed(uid, limit, page);
-            } else {
-                tweets = tweetService.getUserFeed(handle, limit, page);
+            } else { // we are getting a profile feed
+                tweets = tweetService.getUserProfile(uid, handle, limit, page);
             }
 
             JsonObject res = new JsonObject();
